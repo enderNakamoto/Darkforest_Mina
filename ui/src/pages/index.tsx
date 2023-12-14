@@ -1,47 +1,263 @@
+import { useEffect, useState } from 'react';
+import './reactCOIServiceWorker';
+import ZkappWorkerClient from './zkAppWorkerClient';
+import { PublicKey, Field } from 'o1js';
+import GradientBG from '../components/GradientBG.js';
+import styles from '../styles/Home.module.css';
 
-import Head from 'next/head';
-import Image from 'next/image';
-import { useEffect } from 'react';
-
+let transactionFee = 0.1;
+const ZKAPP_ADDRESS = 'B62qo2Be4Udo5EG1ux9yMJVkXe9Gz945cocN7Bn4W9DSYyeHZr1C3Ea';
 
 export default function Home() {
-  useEffect(() => {
-    (async () => {
-      const { Mina, PublicKey } = await import('o1js');
-      const { Add } = await import('../../../contracts/build/src/');
+  const [state, setState] = useState({
+    zkappWorkerClient: null as null | ZkappWorkerClient,
+    hasWallet: null as null | boolean,
+    hasBeenSetup: false,
+    accountExists: false,
+    currentNum: null as null | Field,
+    publicKey: null as null | PublicKey,
+    zkappPublicKey: null as null | PublicKey,
+    creatingTransaction: false
+  });
 
-      // Update this to use the address (public key) for your zkApp account.
-      // To try it out, you can try this address for an example "Add" smart contract that we've deployed to
-      // Berkeley Testnet B62qkwohsqTBPsvhYE8cPZSpzJMgoKn4i1LQRuBAtVXWpaT4dgH6WoA.
-      const zkAppAddress = '';
-      // This should be removed once the zkAppAddress is updated.
-      if (!zkAppAddress) {
-        console.error(
-          'The following error is caused because the zkAppAddress has an empty string as the public key. Update the zkAppAddress with the public key for your zkApp account, or try this address for an example "Add" smart contract that we deployed to Berkeley Testnet: B62qkwohsqTBPsvhYE8cPZSpzJMgoKn4i1LQRuBAtVXWpaT4dgH6WoA'
-        );
+  const [displayText, setDisplayText] = useState('');
+  const [transactionlink, setTransactionLink] = useState('');
+
+  // -------------------------------------------------------
+  // Do Setup
+
+  useEffect(() => {
+    async function timeout(seconds: number): Promise<void> {
+      return new Promise<void>((resolve) => {
+        setTimeout(() => {
+          resolve();
+        }, seconds * 1000);
+      });
+    }
+
+    (async () => {
+      if (!state.hasBeenSetup) {
+        setDisplayText('Loading web worker...');
+        console.log('Loading web worker...');
+        const zkappWorkerClient = new ZkappWorkerClient();
+        await timeout(5);
+
+        setDisplayText('Done loading web worker');
+        console.log('Done loading web worker');
+
+        await zkappWorkerClient.setActiveInstanceToBerkeley();
+
+        const mina = (window as any).mina;
+
+        if (mina == null) {
+          setState({ ...state, hasWallet: false });
+          return;
+        }
+
+        const publicKeyBase58: string = (await mina.requestAccounts())[0];
+        const publicKey = PublicKey.fromBase58(publicKeyBase58);
+
+        console.log(`Using key:${publicKey.toBase58()}`);
+        setDisplayText(`Using key:${publicKey.toBase58()}`);
+
+        setDisplayText('Checking if fee payer account exists...');
+        console.log('Checking if fee payer account exists...');
+
+        const res = await zkappWorkerClient.fetchAccount({
+          publicKey: publicKey!
+        });
+        const accountExists = res.error == null;
+
+        await zkappWorkerClient.loadContract();
+
+        console.log('Compiling zkApp...');
+        setDisplayText('Compiling zkApp...');
+        await zkappWorkerClient.compileContract();
+        console.log('zkApp compiled');
+        setDisplayText('zkApp compiled...');
+
+        const zkappPublicKey = PublicKey.fromBase58(ZKAPP_ADDRESS);
+
+        await zkappWorkerClient.initZkappInstance(zkappPublicKey);
+
+        console.log('Getting zkApp state...');
+        setDisplayText('Getting zkApp state...');
+        await zkappWorkerClient.fetchAccount({ publicKey: zkappPublicKey });
+        const currentNum = await zkappWorkerClient.getNum();
+        console.log(`Current state in zkApp: ${currentNum.toString()}`);
+        setDisplayText('');
+
+        setState({
+          ...state,
+          zkappWorkerClient,
+          hasWallet: true,
+          hasBeenSetup: true,
+          publicKey,
+          zkappPublicKey,
+          accountExists,
+          currentNum
+        });
       }
-      //const zkApp = new Add(PublicKey.fromBase58(zkAppAddress))
     })();
   }, []);
 
-  return (
-    <>
-      <Head>
-        <title>Mina zkApp UI</title>
-        <meta name="description" content="built with o1js" />
-        <link rel="icon" href="/assets/favicon.ico" />
-      </Head>
-      <div>
-        NextJs Starter kit
-        <blockquote>
-        <p className="text-lg font-medium">
-          “Tailwind CSS is the only framework that I've seen scale
-          on large teams. It’s easy to customize, adapts to any design,
-          and the build size is tiny.”
-        </p>
-      </blockquote>
-      </div>
+  // -------------------------------------------------------
+  // Wait for account to exist, if it didn't
 
-    </>
+  useEffect(() => {
+    (async () => {
+      if (state.hasBeenSetup && !state.accountExists) {
+        for (;;) {
+          setDisplayText('Checking if fee payer account exists...');
+          console.log('Checking if fee payer account exists...');
+          const res = await state.zkappWorkerClient!.fetchAccount({
+            publicKey: state.publicKey!
+          });
+          const accountExists = res.error == null;
+          if (accountExists) {
+            break;
+          }
+          await new Promise((resolve) => setTimeout(resolve, 5000));
+        }
+        setState({ ...state, accountExists: true });
+      }
+    })();
+  }, [state.hasBeenSetup]);
+
+  // -------------------------------------------------------
+  // Send a transaction
+
+  const onSendTransaction = async () => {
+    setState({ ...state, creatingTransaction: true });
+
+    setDisplayText('Creating a transaction...');
+    console.log('Creating a transaction...');
+
+    await state.zkappWorkerClient!.fetchAccount({
+      publicKey: state.publicKey!
+    });
+
+    await state.zkappWorkerClient!.createUpdateTransaction();
+
+    setDisplayText('Creating proof...');
+    console.log('Creating proof...');
+    await state.zkappWorkerClient!.proveUpdateTransaction();
+
+    console.log('Requesting send transaction...');
+    setDisplayText('Requesting send transaction...');
+    const transactionJSON = await state.zkappWorkerClient!.getTransactionJSON();
+
+    setDisplayText('Getting transaction JSON...');
+    console.log('Getting transaction JSON...');
+    const { hash } = await (window as any).mina.sendTransaction({
+      transaction: transactionJSON,
+      feePayer: {
+        fee: transactionFee,
+        memo: ''
+      }
+    });
+
+    const transactionLink = `https://berkeley.minaexplorer.com/transaction/${hash}`;
+    console.log(`View transaction at ${transactionLink}`);
+
+    setTransactionLink(transactionLink);
+    setDisplayText(transactionLink);
+
+    setState({ ...state, creatingTransaction: false });
+  };
+
+  // -------------------------------------------------------
+  // Refresh the current state
+
+  const onRefreshCurrentNum = async () => {
+    console.log('Getting zkApp state...');
+    setDisplayText('Getting zkApp state...');
+
+    await state.zkappWorkerClient!.fetchAccount({
+      publicKey: state.zkappPublicKey!
+    });
+    const currentNum = await state.zkappWorkerClient!.getNum();
+    setState({ ...state, currentNum });
+    console.log(`Current state in zkApp: ${currentNum.toString()}`);
+    setDisplayText('');
+  };
+
+  // -------------------------------------------------------
+  // Create UI elements
+
+  let hasWallet;
+  if (state.hasWallet != null && !state.hasWallet) {
+    const auroLink = 'https://www.aurowallet.com/';
+    const auroLinkElem = (
+      <a href={auroLink} target="_blank" rel="noreferrer">
+        Install Auro wallet here
+      </a>
+    );
+    hasWallet = <div>Could not find a wallet. {auroLinkElem}</div>;
+  }
+
+  const stepDisplay = transactionlink ? (
+    <a href={displayText} target="_blank" rel="noreferrer">
+      View transaction
+    </a>
+  ) : (
+    displayText
+  );
+
+  let setup = (
+    <div
+      className={styles.start}
+      style={{ fontWeight: 'bold', fontSize: '1.5rem', paddingBottom: '5rem' }}
+    >
+      {stepDisplay}
+      {hasWallet}
+    </div>
+  );
+
+  let accountDoesNotExist;
+  if (state.hasBeenSetup && !state.accountExists) {
+    const faucetLink =
+      'https://faucet.minaprotocol.com/?address=' + state.publicKey!.toBase58();
+    accountDoesNotExist = (
+      <div >
+        <span style={{paddingRight: '1rem'}}>Account does not exist.</span>
+        <a href={faucetLink} target="_blank" rel="noreferrer">
+          Visit the faucet to fund this fee payer account
+        </a>
+      </div>
+    );
+  }
+
+  let mainContent;
+  if (state.hasBeenSetup && state.accountExists) {
+    mainContent = (
+      <div style={{ justifyContent: 'center', alignItems: 'center' }}>
+        <div className={styles.center} style={{ padding: 0 }}>
+          Current state in zkApp: {state.currentNum!.toString()}{' '}
+        </div>
+        <button
+          className={styles.card}
+          onClick={onSendTransaction}
+          disabled={state.creatingTransaction}
+        >
+          Send Transaction
+        </button>
+        <button className={styles.card} onClick={onRefreshCurrentNum}>
+          Get Latest State
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <GradientBG>
+      <div className={styles.main} style={{ padding: 0 }}>
+        <div className={styles.center} style={{ padding: 0 }}>
+          {setup}
+          {accountDoesNotExist}
+          {mainContent}
+        </div>
+      </div>
+    </GradientBG>
   );
 }
