@@ -1,7 +1,7 @@
 import { Field, SmartContract, state, State, method, Struct, PublicKey } from 'o1js';
 
 // this has to be private
-export class PlanetCordinates extends Struct({
+export class Position extends Struct({
   x: Field,
   y: Field,
   panetId: Field
@@ -10,6 +10,7 @@ export class PlanetCordinates extends Struct({
 export class Planet extends Struct({
   id: Field,
   population: Field,
+  position: Position,
   populationCap: Field,
   populationGrowth: Field,
   ore: Field,
@@ -17,9 +18,9 @@ export class Planet extends Struct({
   oreGrowth: Field,
 }){ }
 
-export class ArrivalData extends Struct({
+export class Movement extends Struct({
   id: Field,
-  attacker: PublicKey,
+  initiator: PublicKey,
   fromPlanet: Field,
   toPlanet: Field,
   popArriving: Field,
