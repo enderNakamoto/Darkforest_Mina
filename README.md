@@ -1,10 +1,10 @@
 # Game Overview
 
-Dark Forest is a MMO (massively multiplayer online) game using Zero Knowledge Proofs to simulate fog of war .
+Dark Forest is a MMO (massively multiplayer online) game using Zero Knowledge Proofs to simulate verifiable fog of war .
 
 The most important aspect of the dark forest universe is `Planet`
 
-```
+```typescript
 export class Planet extends Struct({
   id: Field,
   population: Field,
@@ -21,7 +21,7 @@ The Planet has two resources - population and ore (more can be added later), bot
 
 The Planet's position that is kept secret. Players can only observe (detect) the limited universe around them as they move around (enumerate) through the coordinates. They can detect other planets with hash collisions 
 
-```
+```typescript
 export class Position extends Struct({
   x: Field,
   y: Field,
@@ -32,7 +32,7 @@ export class Position extends Struct({
 
 Players can also move their Fleet, and move population or Ore with it. It is represented by the Struct as follows
 
-```
+```typescript
 export class Movement extends Struct({
   id: Field,
   initiator: PublicKey,
@@ -50,6 +50,6 @@ If the population landed via fleet exceeds current population of the planet, pla
 
 ## Refrences 
 
-[Simple Game Explanation](https://trapdoortech.medium.com/dark-forest-one-interesting-game-with-zk-snark-technology-47528fa7691e)
-[ZK Global Game Overview](https://www.youtube.com/watch?v=nwUCccUS75k)
-[https://github.com/darkforest-eth](Original Dark Forest Github)
+* [Simple Game Explanation](https://trapdoortech.medium.com/dark-forest-one-interesting-game-with-zk-snark-technology-47528fa7691e)
+* [ZK Global Game Overview](https://www.youtube.com/watch?v=nwUCccUS75k)
+* [Original DF git repo](https://github.com/darkforest-eth)
