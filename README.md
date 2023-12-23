@@ -1,7 +1,9 @@
 # Game Overview
 
+## Introduction 
 Dark Forest is a MMO (massively multiplayer online) game using Zero Knowledge Proofs to simulate verifiable fog of war .
 
+## Game Objects
 The most important aspect of the dark forest universe is `Planet`
 
 ```typescript
@@ -47,8 +49,23 @@ export class Movement extends Struct({
 
 If the population landed via fleet exceeds current population of the planet, player can take over the planet. If the planet already belonged to a player, then the population gets added. 
 
+## Spawning Solar systems/Planets
+Creating a universe that balances realism with engaging gameplay presents a unique challenge. 
+We use Poseidon hash functions to generate planet coordinates, adjusting their rarity by modifying the number of leading zeros in the hash values. This method creates a randomized yet controlled distribution of planets, essential for gameplay dynamics. The scripts for the numerical tests is in `helpers/birthing.ts` 
 
-## Refrences 
+### Numerical Insights
+**Initial Test**: On a 200 x 200 grid, the number of planets varied significantly with the change in leading zeros:
+
+* With no leading zeros, 34,930 planets (87.325% of coordinates)
+* With one zero, 7,151 planets (17.8775%)
+* With two zeros, 243 planets (0.60825%)
+
+Increasing zeros further drastically reduced the number of planets.
+
+**Realistic Comparison**: In reality, only about 14 known stars exist within a 10 light-year radius of our Sun. This sparsity contrasts with the game's initial setting, where around 190 stars are placed within a 100 light-year radius, with a difficulty of three leading zeros.
+
+
+## References 
 
 * [Simple Game Explanation](https://trapdoortech.medium.com/dark-forest-one-interesting-game-with-zk-snark-technology-47528fa7691e)
 * [ZK Global Game Overview](https://www.youtube.com/watch?v=nwUCccUS75k)
