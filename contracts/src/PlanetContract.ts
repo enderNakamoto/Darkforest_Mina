@@ -1,6 +1,6 @@
 import { Field, SmartContract, state, State, method, Struct, PublicKey, Poseidon } from 'o1js';
 
-// this has to be private
+// this has to be Private
 export class Position extends Struct({
   x: Field,
   y: Field,
@@ -18,36 +18,28 @@ export class Planet extends Struct({
   oreGrowth: Field,
 }){ }
 
-export class Movement extends Struct({
-  id: Field,
-  initiator: PublicKey,
-  fromPlanet: Field,
-  toPlanet: Field,
-  popArriving: Field,
-  oreMoved: Field,
-  departureTime: Field,
-  arrivalTime: Field
-}){ }
+// TODO for Planet initialization
 
-// to do notes: 
-// 1. need to come up with a realistic initial radius 
+// 1. Need to come up with a realistic initial radius 
 // 2. figure how to space the planets apart 
 // 3. How to randomly initiate planets 
-// 4. Mina has access to VRF?
+// 4. Mina has access to VRF
 // 5. Mina has no mapping, so save planets in Merkle Tree(nullifier perhaps?)
-// 6. Moving Circuit ...
 // 7. A way to increase radius based on planets 
-// 8. perhaps, for V1, we can have max, planets and a constant game radius
 // 9. to counter Sybil, requitre Mina to initiate a planet
 // 10. DarkForest uses MIMC hash, can we use Poseidon instead? 
 
-export class DarkForest extends SmartContract {
+export class PlanetContract extends SmartContract {
+
+  // public values stored in Mina 
   @state(Field) gameRadius = State<Field>();
+  @state(Field) numberOfPlanets = State<Field>();
 
-
+  // initial values
+  // - set gameRadius to 100
+  // - set numberOfPlanets to 0 
   init() {
     super.init();
-    // set the radius to 
     this.gameRadius.set(Field(100))
   }
 
@@ -67,12 +59,5 @@ export class DarkForest extends SmartContract {
 
     const positionHash = Poseidon.hash([x, y]); 
     // to do , need to save the hash somewhere - merkle tree may be?
-  }
-
-
-  // During the fleet’s movement, 
-  // the move circuit checks the moving range does not exceed a circular area of radius distMax:
-  @method moveFleet() {
-    // to do - initiate a Planet
   }
 }

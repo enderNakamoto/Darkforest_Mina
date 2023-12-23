@@ -3,7 +3,7 @@
 
 import fs from 'fs/promises';
 import { Field, Mina, PrivateKey, AccountUpdate } from 'o1js';
-import { DarkForest } from './DarkForest.js';
+import { DarkForest } from './DarkForestCore.js';
 
 // // ---------------------------------------
 // // Local Blockchain deployment and testing 
