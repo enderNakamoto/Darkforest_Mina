@@ -70,3 +70,24 @@ Increasing zeros further drastically reduced the number of planets.
 * [Simple Game Explanation](https://trapdoortech.medium.com/dark-forest-one-interesting-game-with-zk-snark-technology-47528fa7691e)
 * [ZK Global Game Overview](https://www.youtube.com/watch?v=nwUCccUS75k)
 * [Original DF git repo](https://github.com/darkforest-eth)
+
+## Game Notes
+
+### TODO for Planet initialization
+
+1. Need to come up with a realistic initial radius 
+2. figure how to space the planets apart 
+3. How to randomly initiate planets 
+4. Mina has access to VRF?
+5. Mina has no mapping, so save planets in Merkle Tree(nullifier perhaps?)
+7. A way to increase radius based on planets 
+9. to counter Sybil, requitre Mina to initiate a planet
+10. DarkForest uses MIMC hash, can we use Poseidon instead? 
+
+
+* Deploy Contract with initial MerkleMap(Merkle Tree) to hold Planet Hashes and World Radius
+* A player is initiated on the client side within a radius, when a user interacts with UI (Join Game Button).
+* A user is asked to give a secret phrase (salt).
+* 
+* 
+   
