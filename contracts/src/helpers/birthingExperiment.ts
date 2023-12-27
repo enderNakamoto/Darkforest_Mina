@@ -92,8 +92,7 @@ This will allow ~190 stars to be discovered at the start of the game.
 
 */
 
-import { Field, Poseidon, Provable } from 'o1js';
-import { Integer } from 'o1js/dist/node/bindings/crypto/non-negative';
+import { Field, Poseidon } from 'o1js';
 
 console.log('in birthing calculator')
 
