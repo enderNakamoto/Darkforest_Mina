@@ -72,7 +72,8 @@ Increasing zeros further drastically reduced the number of planets.
 * [Original DF git repo](https://github.com/darkforest-eth)
 
 
-### Mining Planets
+## Mining Planets (Benchmarking)
+
 The coordinates of planets are stored as private data and are not publicly disclosed.The only information available to the public is the Poseidon hash of these coordinates, leveraging the Poseidon.hash([x, y]) function, known for its efficiency in SNARK-friendly environments.
 
 In a game arena, be it a square grid of dimensions N x N or a circle with radius R, the objective is to discover the private coordinates of all planets. This is achieved through identifying hash collisions - by generating and comparing the Poseidon hashes for every possible coordinate pair within the game's defined space.
