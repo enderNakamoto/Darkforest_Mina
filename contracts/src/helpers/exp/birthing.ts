@@ -94,7 +94,7 @@ This will allow ~190 stars to be discovered at the start of the game.
 
 import { Field, Poseidon } from 'o1js';
 
-console.log('in birthing calculator')
+console.log('in birthing experiment')
 
 function generateExampleCoordinates() {
     for (let i = 0; i < 10; i++) {

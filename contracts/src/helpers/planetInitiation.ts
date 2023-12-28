@@ -5,7 +5,8 @@ function getRandomHomePlanetCoordsCircle(worldRadius: number): [{x: number, y: n
     let count = 1000;
     let cutoff = 179794564687457839956419684630393576868452302619104417668738877266031346568; 
     let validHomePlanet = false;
-    let x, y, hash;
+    let x, y;
+    let hash = Field(0);
 
     do {
         const t = Math.random() * 2 * Math.PI;
