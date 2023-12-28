@@ -82,14 +82,14 @@ Thhe experiment at `helpers/exp/mining.ts` aims to determine the time frame nece
 We also compare Poseidon with with Keccak 
 
 #### Poseidon hashing on M1 Mac
-time taken to hash 100 coordinates: 29 ms
-time taken to hash 1000 coordinates: 253 ms
-time taken to hash 10000 coordinates: 2475 ms
+* time taken to hash 100 coordinates: 29 ms
+* time taken to hash 1000 coordinates: 253 ms
+* time taken to hash 10000 coordinates: 2475 ms
 
 #### Keccak256 hashing on M1 Mac
-time taken to hash 100 coordinates: 124 ms
-time taken to hash 1000 coordinates: 1043 ms
-time taken to hash 10000 coordinates: 10320 ms
+* time taken to hash 100 coordinates: 124 ms
+* time taken to hash 1000 coordinates: 1043 ms
+* time taken to hash 10000 coordinates: 10320 ms
 
 Hashing with `Hash.SHA3_256.hash(bytes), Hash.SHA3_512.hash(bytes) and Hash.SHA3_384.hash(bytes)`, yielded similar results to keccak256 
 
