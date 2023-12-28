@@ -11,7 +11,7 @@ This experiment is to see how long it would take to find coordinates of a planet
 That will determine how big the search space (game world) should be.
 
 */
-import { Field, Poseidon } from 'o1js';
+import { Field, Poseidon, Bytes, Hash } from 'o1js';
 
 console.log('in birthing experiment')
 
@@ -27,7 +27,8 @@ function generateRandomCoordinates(num: number) {
     return coordinates;
 }
 
-function hashCoordinates(coordinates: {x: number, y: number}[]) {
+// test Poseidon hash
+function hashCoordinatesPoseidon(coordinates: {x: number, y: number}[]) {
     console.log('-------------------');
     console.log(`hashing ${coordinates.length} coordinates`);
     let hashes = [];
@@ -37,12 +38,65 @@ function hashCoordinates(coordinates: {x: number, y: number}[]) {
     }
 }
 
-function benchmarkHashing(num: number) {
+function benchmarkHashingPoseidon(num: number) {
     console.log('-------------------');
     console.log(`benchmarking hashing ${num} coordinates`);
     let coordinates = generateRandomCoordinates(num);
     const start = Date.now();
-    hashCoordinates(coordinates);
+    hashCoordinatesPoseidon(coordinates);
     const end = Date.now();
     console.log(`time taken to hash ${num} coordinates: ${end - start} ms`);
 }
+
+// test Keccak hash
+
+function hashCoordinatesKeccak(coordinates: {x: number, y: number}[]) {
+    console.log('-------------------');
+    console.log(`hashing ${coordinates.length} coordinates`);
+    let hashes = [];
+    for (let i = 0; i < coordinates.length; i++) {
+        const bytes = Bytes.from(new Uint8Array([coordinates[i].x, coordinates[i].y]));
+        const hash = Hash.Keccak256.hash(bytes);
+        hashes.push(hash);
+    }
+}
+
+function benchmarkHashingKeccak(num: number) {
+    console.log('-------------------');
+    console.log(`benchmarking hashing ${num} coordinates`);
+    let coordinates = generateRandomCoordinates(num);
+    const start = Date.now();
+    hashCoordinatesKeccak(coordinates);
+    const end = Date.now();
+    console.log(`time taken to hash ${num} coordinates: ${end - start} ms`);
+ }
+
+
+
+// test Keccak hash
+
+function hashCoordinatesSha256(coordinates: {x: number, y: number}[]) {
+    console.log('-------------------');
+    console.log(`hashing ${coordinates.length} coordinates`);
+    let hashes = [];
+    for (let i = 0; i < coordinates.length; i++) {
+        const bytes = Bytes.from(new Uint8Array([coordinates[i].x, coordinates[i].y]));
+        const hash = Hash.SHA3_256.hash(bytes);
+        hashes.push(hash);
+    }
+}
+
+function benchmarkHashingSha256(num: number) {
+    console.log('-------------------');
+    console.log(`benchmarking hashing ${num} coordinates`);
+    let coordinates = generateRandomCoordinates(num);
+    const start = Date.now();
+    hashCoordinatesSha256(coordinates);
+    const end = Date.now();
+    console.log(`time taken to hash ${num} coordinates: ${end - start} ms`);
+ }
+
+
+// benchmarkHashingPoseidon(100000);
+// benchmarkHashingKeccak(1000);
+benchmarkHashingSha256(100);

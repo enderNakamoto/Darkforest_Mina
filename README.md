@@ -71,6 +71,30 @@ Increasing zeros further drastically reduced the number of planets.
 * [ZK Global Game Overview](https://www.youtube.com/watch?v=nwUCccUS75k)
 * [Original DF git repo](https://github.com/darkforest-eth)
 
+
+### Mining Planets
+The coordinates of planets are stored as private data and are not publicly disclosed.The only information available to the public is the Poseidon hash of these coordinates, leveraging the Poseidon.hash([x, y]) function, known for its efficiency in SNARK-friendly environments.
+
+In a game arena, be it a square grid of dimensions N x N or a circle with radius R, the objective is to discover the private coordinates of all planets. This is achieved through identifying hash collisions - by generating and comparing the Poseidon hashes for every possible coordinate pair within the game's defined space.
+
+Thhe experiment at `helpers/exp/mining.ts` aims to determine the time frame necessary to uncover the coordinates of all planets via hash collisions. The findings from this experiment will be pivotal in defining the size of the search space (game world), ensuring it offers an adequate level of challenge while maintaining cryptographic integrity.
+
+We also compare Poseidon with with Keccak 
+
+#### Poseidon hashing on M1 Mac
+time taken to hash 100 coordinates: 29 ms
+time taken to hash 1000 coordinates: 253 ms
+time taken to hash 10000 coordinates: 2475 ms
+
+#### Keccak256 hashing on M1 Mac
+time taken to hash 100 coordinates: 124 ms
+time taken to hash 1000 coordinates: 1043 ms
+time taken to hash 10000 coordinates: 10320 ms
+
+Hashing with `Hash.SHA3_256.hash(bytes), Hash.SHA3_512.hash(bytes) and Hash.SHA3_384.hash(bytes)`, yielded similar results to keccak256 
+
+Therefore, it might be better to use the Keccak hash to save planet locations publicly to add extra layer of protection. Ironically, because Keccak is less efficient, it yields better protection.
+
 ## Game Notes
 
 ### TODO for Planet initialization
