@@ -60,15 +60,19 @@ export class PlanetCreator extends SmartContract {
     const rSquared = gameRadius.mul(gameRadius);
     xSquared.add(ySquared).assertLessThan(rSquared);
 
-    const nullifierRoot = this.mapRoot.get();
-    this.mapRoot.requireEquals(nullifierRoot);
+    // get the hash of the coordinates
+    // add data to merkle map, if it does not exist yet
+        // check if palyer has homeworld already
+        // if not, add to merkle map
+
 
     const positionHash = Poseidon.hash([x, y]); 
- 
+    const initialRoot = this.mapRoot.getAndRequireEquals();
+
     // check the initial state matches what we expect,
     // in this case, value has not been set yet so it should be 0
     const [ rootBefore, key ] = keyWitness.computeRootAndKey(Field(0));
-    rootBefore.assertEquals(nullifierRoot);
+    rootBefore.assertEquals(initialRoot);
 
     key.assertEquals(player);
 

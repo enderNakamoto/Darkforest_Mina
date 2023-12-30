@@ -1,31 +1,110 @@
+import { 
+    Field,
+    Mina,
+    Poseidon, 
+    MerkleMap, 
+    PrivateKey, 
+    PublicKey, 
+    AccountUpdate
+} from "o1js";
+
+import {
+    getRandomHomePlanetCoordsCircle, 
+    getRandomHomePlanetCoordsSquare
+} from "./helpers/planetInitiation.js";
+
+import { PlanetCreator } from './PlanetCreator.js';
+
+// ----------------------------------------------------
+// initiate a local blockchain, and an account to deploy the zkApp
+// ----------------------------------------------------
+console.log('initiating local blockchain, and deployer account...');
+const proofsEnabled = false;
+const Local = Mina.LocalBlockchain({ proofsEnabled });
+Mina.setActiveInstance(Local);
+const deployerAccount = Local.testAccounts[0].privateKey;
+
+// ----------------------------------------------------
+// Create a public/private key pair. The public key is your address and where you deploy the zkApp to
+// ----------------------------------------------------
+console.log('creating key pair...');
+const zkAppPrivateKey = PrivateKey.random();
+const zkAppAddress = zkAppPrivateKey.toPublicKey();
+
+// ----------------------------------------------------
+// compile the zkApp
+// ----------------------------------------------------
+console.log('compiling...');
+
+let verificationKey: any;
+if (proofsEnabled) {
+  ({ verificationKey } = await PlanetCreator.compile());
+}
+console.log('zk App successfully compiled');
+
+
+//----------------------------------------------------
+// deploy the zkApp
+//----------------------------------------------------
+console.log('deploying...');
+const contract = new PlanetCreator(zkAppAddress);
+const deploy_txn = await Mina.transaction(deployerAccount.toPublicKey(), () => {
+  AccountUpdate.fundNewAccount(deployerAccount.toPublicKey());
+  contract.deploy({ verificationKey, zkappKey: zkAppPrivateKey });
+});
+await deploy_txn.prove();
+await deploy_txn.sign([deployerAccount]).send();
+
+console.log('deployed');
+
+// ----------------------------------------------------
+
+
+
+
+
+// to run this file, use the following command:
 // node build/src/interact.js <deployAlias>
 
+// ---------------------------------------
+// Testing merkle map, and coordinate generation
+//----------------------------------------
 
-import fs from 'fs/promises';
-import { Field, Mina, PrivateKey, AccountUpdate } from 'o1js';
-import { DarkForest } from './DarkForestCore.js';
+// const map = new MerkleMap();
+// let cords, hash, count;
 
-// // ---------------------------------------
-// // Local Blockchain deployment and testing 
-// //----------------------------------------
+// let PlayerAPrivate = PrivateKey.random();
+// let PlayerA = PublicKey.fromPrivateKey(PlayerAPrivate)
 
-// const useProof = false;
-// const Local = Mina.LocalBlockchain({ proofsEnabled: useProof });
-// Mina.setActiveInstance(Local);
-// const { privateKey: deployerKey, publicKey: deployerAccount } = Local.testAccounts[0];
-// const { privateKey: senderKey, publicKey: senderAccount } = Local.testAccounts[1];
+// let PlayerBPrivate = PrivateKey.random();
+// let PlayerB = PublicKey.fromPrivateKey(PlayerBPrivate)
 
-// // ----------------------------------------------------
-// // Create a public/private key pair. The public key is your address and where you deploy the zkApp to
-// const zkAppPrivateKey = PrivateKey.random();
-// const zkAppAddress = zkAppPrivateKey.toPublicKey();
+// const value = Poseidon.hash([Field(cords.x), Field(cords.y)]);
+// map.set(key, value);
 
-// // create an instance of Add - and deploy it to zkAppAddress
-// const zkAppInstance = new Add(zkAppAddress);
-// const deployTxn = await Mina.transaction(deployerAccount, () => {
-//   AccountUpdate.fundNewAccount(deployerAccount);
-//   zkAppInstance.deploy();
-// });
+// console.log('value for key', key.toString() + '=========>', map.get(key).toString());
+
+// const keyB = Poseidon.hash(PlayerB.toFields());
+// console.log('value for key', keyB.toString() + '=========>', map.get(keyB));
+
+// if (map.get(keyB).toString() == '0') {
+//     console.log('Player B does not have a home planet');
+// }
+
+// // const randomHomePlanetCoords = getRandomHomePlanetCoordsCircle(100);
+// // console.log('random home planet coords', randomHomePlanetCoords);
+
+// const randomHomePlanetCoords = getRandomHomePlanetCoordsCircle();
+// console.log('random home planet coords', randomHomePlanetCoords);
+
+// const key = Poseidon.hash(PlayerA.toFields());
+// [cords, hash, count] = getRandomHomePlanetCoordsCircle();
+
+// console.log('Player A', PlayerA.toString());
+
+
+// ----------------------------------------------------
+
 
 // await deployTxn.sign([deployerKey, zkAppPrivateKey]).send();
 // // get the initial state of Add after deployment

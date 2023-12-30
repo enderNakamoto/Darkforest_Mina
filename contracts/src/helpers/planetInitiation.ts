@@ -1,9 +1,15 @@
-import { Poseidon, Field } from 'o1js';
+import { Poseidon, Field, MerkleMap } from 'o1js';
+
+import {
+    WORLD_LENGTH_SQUARE,
+    WORLD_RADIUS_CIRCLE,
+    TRIES,
+    DIFFICULTY_CUTOFF
+} from './const.js';
 
 // gameworld is a cirdular world with a radius of worldRadius
-function getRandomHomePlanetCoordsCircle(worldRadius: number): [{x: number, y: number}, Field]  {
-    let count = 1000;
-    let cutoff = 179794564687457839956419684630393576868452302619104417668738877266031346568; 
+export function getRandomHomePlanetCoordsCircle(worldRadius: number = WORLD_RADIUS_CIRCLE): [{x: number, y: number}, String, number]  {
+    let count = TRIES;
     let validHomePlanet = false;
     let x, y;
     let hash = Field(0);
@@ -17,7 +23,7 @@ function getRandomHomePlanetCoordsCircle(worldRadius: number): [{x: number, y: n
         if (x ** 2 + y ** 2 >= worldRadius ** 2) continue;
         hash = Poseidon.hash([Field(x), Field(y)]);
 
-        if (hash.lessThan(cutoff)) {
+        if (hash.lessThan(DIFFICULTY_CUTOFF).toString() == "true") {
             validHomePlanet = true
         }
     
@@ -25,15 +31,14 @@ function getRandomHomePlanetCoordsCircle(worldRadius: number): [{x: number, y: n
     } while (!validHomePlanet && count > 0);
 
     if (validHomePlanet) {
-        return [{ x, y}, hash];
+        return [{ x, y}, hash.toString(), count];
     }
-    return [{ x: 0, y: 0}, Field(0)];
+    return [{ x: 0, y: 0}, '0', count];
 }
 
 // if the game world is a square of NxN
-function getRandomHomePlanetCoordsSquare(N: number): [{x: number, y: number}, Field]  {
-    let count = 1000;
-    let cutoff = 179794564687457839956419684630393576868452302619104417668738877266031346568; 
+export function getRandomHomePlanetCoordsSquare(N: number = WORLD_LENGTH_SQUARE): [{x: number, y: number}, String, number]  {
+    let count = TRIES;
     let validHomePlanet = false;
     let x, y, hash;
 
@@ -41,19 +46,17 @@ function getRandomHomePlanetCoordsSquare(N: number): [{x: number, y: number}, Fi
         x = Math.floor(Math.random() * N);
         y = Math.floor(Math.random() * N);
         hash = Poseidon.hash([Field(x), Field(y)]);
-
-        if (hash.lessThan(cutoff)) {
+        
+        if (hash.lessThan(DIFFICULTY_CUTOFF).toString() == "true") {
             validHomePlanet = true
         }
-    
+        
+        console.log('count', count);
         count -= 1;
     } while (!validHomePlanet && count > 0);
 
     if (validHomePlanet) {
-        return [{ x, y}, hash];
+        return [{ x, y}, hash.toString(), count];
     }
-    return [{ x: 0, y: 0}, Field(0)];
+    return [{ x: 0, y: 0}, '0', count];
 }
-
-export default { getRandomHomePlanetCoordsCircle, 
-    getRandomHomePlanetCoordsSquare};

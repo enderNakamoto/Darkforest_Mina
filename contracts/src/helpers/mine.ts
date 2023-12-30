@@ -77,3 +77,4 @@ function hashSearchSpaceKeccak(searchSpace: Coordinate[]): string[] {
 1. get all planet hashes from merkle tree
 2. compare with hashes from search space with planet hashes
 3. make a explored chuck data object with the search space and mathing planet hashes
+*/
