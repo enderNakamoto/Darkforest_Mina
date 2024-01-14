@@ -6,9 +6,27 @@ import {
     method, 
     Struct, 
     PublicKey, 
-    Poseidon, 
+    Poseidon,
+    MerkleMap,
     MerkleMapWitness
    } from 'o1js';
+
+
+   // limitations on the game 
+   const MAX_NUM_PLANETS = 10000;
+   const MAX_NUM_PLAYERS = 1000;
+
+
+   // playerNullifier is a Merkle Map (key: Player, Value: State) to store player state:
+   // The key is the address, the value is the player initiation state 
+   // if value is Field(0), the address is not in the whitelist.
+   // if value is Field(1), the address is in the whitelist, but player has not initiated a homeworld.
+   // if value is Field(2), the address is in the whitelist, and player has initiated a homeworld.
+   const UNINITIALIZED_VALUE = Field(0);
+   const WHITELISTED_VALUE = Field(1);
+   const HOMEWORLD_SET_VALUE = Field(2);
+   
+   
 
 export class Planet extends Struct({
   id: Field,
@@ -25,7 +43,11 @@ export class PlanetCreator extends SmartContract {
   // public values stored in Mina Blockchain
   @state(Field) gameRadius = State<Field>();
   @state(Field) numberOfPlanets = State<Field>();
-  @state(Field) mapRoot = State<Field>(); 
+  @state(Field) numberofWhiteListedPlayers = State<Field>();
+
+  // Merkle Map to store player Address (Key) and Planet (value), to store who owns which planet
+  @state(Field) mapRoot = State<Field>();
+  @state(Field) playerNullifierRoot = State<Field>();
 
   // initial values
   // - set gameRadius to 100
@@ -34,11 +56,43 @@ export class PlanetCreator extends SmartContract {
     super.init();
     this.gameRadius.set(Field(100))
     this.numberOfPlanets.set(Field(0))
+    this.numberofWhiteListedPlayers.set(Field(0))
   }
 
-  @method initNullifier(initialRoot: Field) {
-    this.mapRoot.set(initialRoot);
+  // initialize the mapRoot, and playerNullifierRoot
+  @method initMap(initialMapRoot: Field, initialPlayerNullifierRoot: Field) {
+    this.mapRoot.set(initialMapRoot);
+    this.playerNullifierRoot.set(initialPlayerNullifierRoot);
   }
+
+
+  // add elgible addresses, set value to Field(1), in playerNullifier
+  @method addEligibleAddress(
+    addressToAdd: PublicKey,
+    keyWitness: MerkleMapWitness,
+  ) {
+    // STEP 1: change address to key
+    const keyToAdd = Poseidon.hash(addressToAdd.toFields());
+
+    // STEP 2: check if the number of addresses reached MAX_NUM_PLANETS
+    const playersNumBefore = this.numberofWhiteListedPlayers.getAndRequireEquals();
+    playersNumBefore.assertLessThan(MAX_NUM_PLANETS);
+
+    // STEP 3: check if the address is already in the whitelist
+    const nullRootBefore = this.playerNullifierRoot.getAndRequireEquals();
+
+    const [ derivedNullRoot, key ] = keyWitness.computeRootAndKey(UNINITIALIZED_VALUE);
+    derivedNullRoot.assertEquals(nullRootBefore);
+    key.assertEquals(keyToAdd);
+
+    // STEP 3: add whitelist address to the merkle map, by updating the root
+    const [ nullRootAfter, _ ] = keyWitness.computeRootAndKey(WHITELISTED_VALUE);
+    this.playerNullifierRoot.set(nullRootAfter);
+
+    // STEP 4: increment numPlayers
+    const playersNumAfter = playersNumBefore.add(Field(1));
+    this.numberofWhiteListedPlayers.set(playersNumAfter);
+}  
 
   /* 
     the initialize circuit ensures the coordinate falls 
@@ -53,6 +107,17 @@ export class PlanetCreator extends SmartContract {
     player: Field,
     keyWitness: MerkleMapWitness
     ) {
+
+    // STEP 1: check if the number of planets reached MAX_NUM_PLANETS
+    // STEP 2: check if the player is in the whitelist
+    // STEP 3: check if the player has already initiated a homeworld
+    // STEP 4: check if the coordinate is within the game radius
+    // STEP 5: add the coordinate to the merkle map, by updating the root
+    // STEP 6: increment the number of planets
+    // STEP 7: update playerNullifier to show player has initiated a homeworld
+    
+
+
     const gameRadius = this.gameRadius.getAndRequireEquals();
 
     const xSquared = x.mul(x);

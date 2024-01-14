@@ -1,10 +1,14 @@
 /* learnings to be used in the future
 
-1. const map = new MerkleMap();, map.set(key, value), map.get(key), map.getRoot(), map.getWitness(key) 
+1. const map = new MerkleMap();,
+ map.set(key, value), 
+ map.get(key), 
+ map.getRoot(), 
+ map.getWitness(key) 
 - these can be used , outside the contract to access the merkle map in the contract. 
 
 2. const key = Poseidon.hash(PlayerA.toFields()) is how we can store key in the merkle map.
-    playerA is a public key, and we need to convert it to a field to store it in the merkle map.
+    playerA is a public key, and we need to convert it to a field, and hashed to store it in the merkle map.
 
 3. const value = Poseidon.hash([Field(50), Field(80)]); is how we can store co-ordinate value in the merkle map.
 
@@ -114,3 +118,29 @@ console.log("calculated root is", calculatedRootC.toString());
 
 console.log("we know key is", key.toString());
 console.log("calculated key is", calculatedKeyC.toString());
+
+console.log("------------------  TEST FOR INITIAZING KEYS, ONLY WHEN IT DOES NTO EXIST ----------------------------")
+
+let PlayerCPrivate = PrivateKey.random();
+let PlayerC = PublicKey.fromPrivateKey(PlayerCPrivate)
+const keyC = Poseidon.hash(PlayerC.toFields());
+console.log("key C is", keyC.toString());
+const valueC = Field(100);
+
+let PlayerDPrivate = PrivateKey.random();
+let PlayerD = PublicKey.fromPrivateKey(PlayerDPrivate)
+const keyD = Poseidon.hash(PlayerD.toFields());
+console.log("key D is", keyD.toString());
+const valueD = Field(200);
+
+const mapA = new MerkleMap();
+const rootA = mapA.getRoot();
+console.log("root is .......", rootA.toString());
+
+let derivedRootA, derivedKeyC; 
+
+const KeyCWitness = mapA.getWitness(keyC);
+
+[derivedRootA, derivedKeyC] = KeyCWitness.computeRootAndKey(Field(0));
+console.log("derived root is", derivedRootA.toString());
+console.log("derived key C is", derivedKeyC.toString());
