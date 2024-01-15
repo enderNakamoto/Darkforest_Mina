@@ -34,12 +34,10 @@ export class PlanetCreator extends SmartContract {
   @state(Field) mapRoot = State<Field>();
   @state(Field) playerNullifierRoot = State<Field>();
 
-  // initial values
-  // - set gameRadius to 100
-  // - set numberOfPlanets to 0 
+
   init() {
     super.init();
-    this.gameRadius.set(Field(100))
+    this.gameRadius.set(Field(1000))
     this.numberOfPlanets.set(Field(0))
     this.numberOfWhiteListedPlayers.set(Field(0))
   }

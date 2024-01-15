@@ -1,15 +1,10 @@
 import { Poseidon, Field, MerkleMap } from 'o1js';
 
-import {
-    WORLD_LENGTH_SQUARE,
-    WORLD_RADIUS_CIRCLE,
-    TRIES,
-    DIFFICULTY_CUTOFF
-} from './const.js';
+import { Const } from './const';
 
 // gameworld is a cirdular world with a radius of worldRadius
-export function getRandomHomePlanetCoordsCircle(worldRadius: number = WORLD_RADIUS_CIRCLE): [{x: number, y: number}, String, number]  {
-    let count = TRIES;
+export function getRandomHomePlanetCoordsCircle(worldRadius: number = Const.MAX_RADIUS): [{x: number, y: number}, String, number]  {
+    let count = Const.TRIES;
     let validHomePlanet = false;
     let x, y;
     let hash = Field(0);
@@ -23,7 +18,7 @@ export function getRandomHomePlanetCoordsCircle(worldRadius: number = WORLD_RADI
         if (x ** 2 + y ** 2 >= worldRadius ** 2) continue;
         hash = Poseidon.hash([Field(x), Field(y)]);
 
-        if (hash.lessThan(DIFFICULTY_CUTOFF).toString() == "true") {
+        if (hash.lessThan(Const.DIFFICULTY_CUTOFF).toString() == "true") {
             validHomePlanet = true
         }
     
@@ -37,8 +32,8 @@ export function getRandomHomePlanetCoordsCircle(worldRadius: number = WORLD_RADI
 }
 
 // if the game world is a square of NxN
-export function getRandomHomePlanetCoordsSquare(N: number = WORLD_LENGTH_SQUARE): [{x: number, y: number}, String, number]  {
-    let count = TRIES;
+export function getRandomHomePlanetCoordsSquare(N: number = Const.MAX_LENGTH): [{x: number, y: number}, String, number]  {
+    let count = Const.TRIES;
     let validHomePlanet = false;
     let x, y, hash;
 
@@ -47,7 +42,7 @@ export function getRandomHomePlanetCoordsSquare(N: number = WORLD_LENGTH_SQUARE)
         y = Math.floor(Math.random() * N);
         hash = Poseidon.hash([Field(x), Field(y)]);
         
-        if (hash.lessThan(DIFFICULTY_CUTOFF).toString() == "true") {
+        if (hash.lessThan(Const.DIFFICULTY_CUTOFF).toString() == "true") {
             validHomePlanet = true
         }
         
