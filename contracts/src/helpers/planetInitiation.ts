@@ -1,4 +1,4 @@
-import { Poseidon, Field, MerkleMap } from 'o1js';
+import { Poseidon, Field } from 'o1js';
 
 import { Const } from './const';
 

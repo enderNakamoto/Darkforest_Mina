@@ -1,5 +1,16 @@
+import {
+  Field,
+  Mina,
+  PrivateKey,
+  PublicKey,
+  AccountUpdate,
+  MerkleMap,
+  Poseidon,
+  MerkleMapWitness
+} from 'o1js';
+
 import { PlanetCreator } from './PlanetCreator';
-import { Field, Mina, PrivateKey, PublicKey, AccountUpdate } from 'o1js';
+import { Const } from './helpers/const';
 
 let proofsEnabled = false;
 
