@@ -5,9 +5,7 @@ import {
     State, 
     method, 
     Struct, 
-    PublicKey, 
     Poseidon,
-    MerkleMap,
     MerkleMapWitness
    } from 'o1js';
 
@@ -31,21 +29,21 @@ export class PlanetCreator extends SmartContract {
   @state(Field) numberOfWhiteListedPlayers = State<Field>();
 
   // Merkle Map to store player Address (Key) and Planet (value), to store who owns which planet
-  @state(Field) mapRoot = State<Field>();
+  @state(Field) planetLedgerRoot = State<Field>();
   @state(Field) playerNullifierRoot = State<Field>();
 
 
   init() {
     super.init();
-    this.gameRadius.set(Field(1000))
+    this.gameRadius.set(Const.INITIAL_GAME_RADIUS)
     this.numberOfPlanets.set(Field(0))
     this.numberOfWhiteListedPlayers.set(Field(0))
   }
 
   // initialize the mapRoot, and playerNullifierRoot
-  @method initMap(initialMapRoot: Field, initialPlayerNullifierRoot: Field) {
-    this.mapRoot.set(initialMapRoot);
-    this.playerNullifierRoot.set(initialPlayerNullifierRoot);
+  @method initMapRoots(initialLedgerRoot: Field, initialNullifierRoot: Field) {
+    this.planetLedgerRoot.set(initialLedgerRoot);
+    this.playerNullifierRoot.set(initialNullifierRoot);
   }
 
   // add elgible addresses, set value to Field(1), in playerNullifier
@@ -109,7 +107,7 @@ export class PlanetCreator extends SmartContract {
 
 
     const positionHash = Poseidon.hash([x, y]); 
-    const initialRoot = this.mapRoot.getAndRequireEquals();
+    const initialRoot = this.planetLedgerRoot.getAndRequireEquals();
 
     // check the initial state matches what we expect,
     // in this case, value has not been set yet so it should be 0
@@ -122,6 +120,6 @@ export class PlanetCreator extends SmartContract {
     const [ rootAfter, _ ] = keyWitness.computeRootAndKey(positionHash);
 
     // set the new root
-    this.mapRoot.set(rootAfter);
+    this.planetLedgerRoot.set(rootAfter);
   }
 }

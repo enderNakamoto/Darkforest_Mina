@@ -4,6 +4,12 @@ import {
 
 
 export namespace Const {
+
+    // initial values
+    export const INITIAL_GAME_RADIUS = Field(1000);
+
+
+
     // game limitations 
     export const MAX_NUM_PLANETS = 10000;
     export const MAX_NUM_PLAYERS = 1000;
