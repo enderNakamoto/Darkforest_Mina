@@ -29,8 +29,8 @@ export class PlanetCreator extends SmartContract {
   @state(Field) numberOfWhiteListedPlayers = State<Field>();
 
   // Merkle Map to store player Address (Key) and Planet (value), to store who owns which planet
-  @state(Field) planetLedgerRoot = State<Field>();
-  @state(Field) playerNullifierRoot = State<Field>();
+  @state(Field) planetLedgerRoot = State<Field>(); // player address (key) and planetPosition (value)
+  @state(Field) playerNullifierRoot = State<Field>(); // player address (key) and nullifier (value)
 
 
   init() {
@@ -80,19 +80,22 @@ export class PlanetCreator extends SmartContract {
     x: Field, 
     y: Field, 
     player: Field,
-    keyWitness: MerkleMapWitness
+    nullifierKeyWitness: MerkleMapWitness, 
+    ledgerKeyWitness: MerkleMapWitness
     ) {
+    let derivedNullRoot, nullRootAfter, ledgerRootAfter, _; 
 
     // STEP 1: check if the number of planets reached MAX_NUM_PLANETS
-    // STEP 2: check if the player is in the whitelist
-    // STEP 3: check if the player has already initiated a homeworld
-    // STEP 4: check if the coordinate is within the game radius
-    // STEP 5: add the coordinate to the merkle map, by updating the root
-    // STEP 6: increment the number of planets
-    // STEP 7: update playerNullifier to show player has initiated a homeworld
+    let planetsNumBefore = this.numberOfPlanets.getAndRequireEquals();
+    planetsNumBefore.assertLessThan(Const.MAX_NUM_PLANETS);
+
+    // STEP 2: check if the player is in the whitelist, and has not initiated a homeworld
+    let nullRootBefore = this.playerNullifierRoot.getAndRequireEquals();
+    [ derivedNullRoot, _ ] = nullifierKeyWitness.computeRootAndKey(Const.WHITELISTED_VALUE);
+    derivedNullRoot.assertEquals(nullRootBefore, Const.PLAYER_CANNOT_INITIATE);
     
 
-
+    // STEP 3: check if the coordinate is within the game radius
     const gameRadius = this.gameRadius.getAndRequireEquals();
 
     const xSquared = x.mul(x);
@@ -100,26 +103,21 @@ export class PlanetCreator extends SmartContract {
     const rSquared = gameRadius.mul(gameRadius);
     xSquared.add(ySquared).assertLessThan(rSquared);
 
-    // get the hash of the coordinates
-    // add data to merkle map, if it does not exist yet
-        // check if palyer has homeworld already
-        // if not, add to merkle map
-
-
+    // STEP 4: make sure that the planet does not belong to someone else already
     const positionHash = Poseidon.hash([x, y]); 
     const initialRoot = this.planetLedgerRoot.getAndRequireEquals();
+    //  TO DO : check if the planet already exists, does not belong to someone else
 
-    // check the initial state matches what we expect,
-    // in this case, value has not been set yet so it should be 0
-    const [ rootBefore, key ] = keyWitness.computeRootAndKey(Field(0));
-    rootBefore.assertEquals(initialRoot);
+   // STEP 5: add the planet to the merkle map, by updating the root   
+    [ ledgerRootAfter, _ ] = ledgerKeyWitness.computeRootAndKey(positionHash);
+    this.planetLedgerRoot.set(ledgerRootAfter);
 
-    key.assertEquals(player);
 
-    // compute the root after incrementing
-    const [ rootAfter, _ ] = keyWitness.computeRootAndKey(positionHash);
+    // STEP 6: increment the number of planets
+    this.numberOfPlanets.set(planetsNumBefore.add(Field(1)));
 
-    // set the new root
-    this.planetLedgerRoot.set(rootAfter);
+    // STEP 7: update playerNullifier to show player has initiated a homeworld
+    [ nullRootAfter, _ ] = nullifierKeyWitness.computeRootAndKey(Const.HOMEWORLD_SET_VALUE);
+    this.playerNullifierRoot.set(nullRootAfter);
   }
 }
