@@ -59,7 +59,7 @@ export class PlanetCreator extends SmartContract {
     // STEP 2: check if the address is already in the whitelist, or has initiated a homeworld
     let nullRootBefore = this.playerNullifierRoot.getAndRequireEquals();
     [ derivedNullRoot, _ ] = keyWitness.computeRootAndKey(Const.UNINITIALIZED_VALUE);
-    derivedNullRoot.assertEquals(nullRootBefore);
+    derivedNullRoot.assertEquals(nullRootBefore, Const.ALREADY_WHITELISTED_ERROR);
 
     // STEP 3: add whitelist address to the merkle map, by updating the root
      [ nullRootAfter, _ ] = keyWitness.computeRootAndKey(Const.WHITELISTED_VALUE);
