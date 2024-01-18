@@ -290,7 +290,7 @@ describe('PlanetCreator Contract', () => {
             ledgerWitness
             );
           });
-        }).rejects.toThrow(Const.HOMEWORLD_ALREADY_INITIATED_ERROR);
+        }).rejects.toThrow(Const.PLAYER_CANNOT_INITIATE_ERROR);
       })
     });
 
