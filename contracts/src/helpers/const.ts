@@ -30,7 +30,8 @@ export namespace Const {
     export const ALREADY_WHITELISTED_ERROR = 'address already in whitelist';
     export const NOT_WHITELISTED_ERROR = 'address not in whitelist';
     export const HOMEWORLD_ALREADY_INITIATED_ERROR = 'homeworld has already been initiated fopr this player';
-    export const PLAYER_CANNOT_INITIATE = 'player is not in whitelist, or has already initiated a homeworld';
+    export const PLAYER_CANNOT_INITIATE_ERROR = 'player is not in whitelist, or has already initiated a homeworld';
+    export const MAX_NUM_PLANETS_ERROR = 'maximum number of planets reached';
 }
 
 

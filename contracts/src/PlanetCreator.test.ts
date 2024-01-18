@@ -15,6 +15,11 @@ import { Const } from './helpers/const';
 
 let proofsEnabled = false;
 
+const VALID_COORDINATES = {
+  x: Field(10),
+  y: Field(10),
+};
+
 function initializeRandomPlayer(){
   const playerPrivate = PrivateKey.random();
   const player = PublicKey.fromPrivateKey(playerPrivate)
@@ -175,6 +180,69 @@ describe('PlanetCreator Contract', () => {
       });
       
     })
+
+    describe('homeworld initiation', () => {
+
+      it ('cannot initiate homeworld for non whitelisted players', async () => {
+        let playerKey, 
+        nullifierWitness: MerkleMapWitness, 
+        ledgerWitness: MerkleMapWitness;
+  
+        playerKey = initializeRandomPlayer();
+        nullifierWitness = nullifierMap.getWitness(playerKey);
+        ledgerWitness = ledgerMap.getWitness(playerKey);
+  
+        expect(async () => {
+          txn = await Mina.transaction(senderAccount, () => {
+          zkAppInstance.initializePlanet(
+            VALID_COORDINATES.x,
+            VALID_COORDINATES.y, 
+            nullifierWitness, 
+            ledgerWitness
+            );
+          });
+        }).rejects.toThrow(Const.PLAYER_CANNOT_INITIATE_ERROR);
+      });
+
+
+      it ('can initiate homeworld for non whitelisted players', async () => {
+        let playerKey, 
+        nullifierWitness: MerkleMapWitness, 
+        ledgerWitness: MerkleMapWitness;
+  
+        playerKey = initializeRandomPlayer();
+        nullifierWitness = nullifierMap.getWitness(playerKey);
+        ledgerWitness = ledgerMap.getWitness(playerKey);
+        ledgerMap.set(playerKey, Poseidon.hash([VALID_COORDINATES.x, VALID_COORDINATES.y]));
+
+        txn = await Mina.transaction(senderAccount, () => {
+          zkAppInstance.addEligibleAddress(nullifierWitness);
+        });
+        await txn.prove();
+        await txn.sign([senderKey]).send();
+  
+        txn = await Mina.transaction(senderAccount, () => {
+        zkAppInstance.initializePlanet(
+          VALID_COORDINATES.x,
+          VALID_COORDINATES.y, 
+          nullifierWitness, 
+          ledgerWitness
+          );
+        });
+        await txn.prove();
+        await txn.sign([senderKey]).send();
+
+        // ledger root state changed correctly after adding new homeworld
+        const ledgerRoot = zkAppInstance.planetLedgerRoot.get();
+        expect(ledgerRoot).toEqual(ledgerMap.getRoot());
+
+        // numberOfPlanets incremented correctly
+        let numPlanets = zkAppInstance.numberOfPlanets.get();
+        expect(numPlanets).toEqual(Field(1));
+
+      });
+
+    });
 
 });
 

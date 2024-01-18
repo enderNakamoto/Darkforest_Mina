@@ -78,8 +78,7 @@ export class PlanetCreator extends SmartContract {
 */
   @method initializePlanet(
     x: Field, 
-    y: Field, 
-    player: Field,
+    y: Field,
     nullifierKeyWitness: MerkleMapWitness, 
     ledgerKeyWitness: MerkleMapWitness
     ) {
@@ -87,12 +86,12 @@ export class PlanetCreator extends SmartContract {
 
     // STEP 1: check if the number of planets reached MAX_NUM_PLANETS
     let planetsNumBefore = this.numberOfPlanets.getAndRequireEquals();
-    planetsNumBefore.assertLessThan(Const.MAX_NUM_PLANETS);
+    planetsNumBefore.assertLessThan(Const.MAX_NUM_PLANETS, Const.MAX_NUM_PLANETS_ERROR);
 
     // STEP 2: check if the player is in the whitelist, and has not initiated a homeworld
     let nullRootBefore = this.playerNullifierRoot.getAndRequireEquals();
     [ derivedNullRoot, _ ] = nullifierKeyWitness.computeRootAndKey(Const.WHITELISTED_VALUE);
-    derivedNullRoot.assertEquals(nullRootBefore, Const.PLAYER_CANNOT_INITIATE);
+    derivedNullRoot.assertEquals(nullRootBefore, Const.PLAYER_CANNOT_INITIATE_ERROR);
     
 
     // STEP 3: check if the coordinate is within the game radius
