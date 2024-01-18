@@ -20,6 +20,11 @@ const VALID_COORDINATES = {
   y: Field(10),
 };
 
+const INVALID_COORDINATES = {
+  x: Field(1000001),
+  y: Field(1000001),
+};
+
 function initializeRandomPlayer(){
   const playerPrivate = PrivateKey.random();
   const player = PublicKey.fromPrivateKey(playerPrivate)
@@ -239,11 +244,81 @@ describe('PlanetCreator Contract', () => {
         // numberOfPlanets incremented correctly
         let numPlanets = zkAppInstance.numberOfPlanets.get();
         expect(numPlanets).toEqual(Field(1));
-
       });
 
+      it ('cannot initiate homeworld for whitelisted players who already have homeworlds', async () => {
+        let playerKey, 
+        nullifierWitness: MerkleMapWitness, 
+        ledgerWitness: MerkleMapWitness;
+  
+        playerKey = initializeRandomPlayer();
+        nullifierWitness = nullifierMap.getWitness(playerKey);
+        ledgerWitness = ledgerMap.getWitness(playerKey);
+        ledgerMap.set(playerKey, Poseidon.hash([VALID_COORDINATES.x, VALID_COORDINATES.y]));
+
+        txn = await Mina.transaction(senderAccount, () => {
+          zkAppInstance.addEligibleAddress(nullifierWitness);
+        });
+        await txn.prove();
+        await txn.sign([senderKey]).send();
+  
+        txn = await Mina.transaction(senderAccount, () => {
+        zkAppInstance.initializePlanet(
+          VALID_COORDINATES.x,
+          VALID_COORDINATES.y, 
+          nullifierWitness, 
+          ledgerWitness
+          );
+        });
+        await txn.prove();
+        await txn.sign([senderKey]).send();
+
+        // ledger root state changed correctly after adding new homeworld
+        const ledgerRoot = zkAppInstance.planetLedgerRoot.get();
+        expect(ledgerRoot).toEqual(ledgerMap.getRoot());
+
+        // numberOfPlanets incremented correctly
+        let numPlanets = zkAppInstance.numberOfPlanets.get();
+        expect(numPlanets).toEqual(Field(1));
+
+        expect(async () => {
+          txn = await Mina.transaction(senderAccount, () => {
+          zkAppInstance.initializePlanet(
+            VALID_COORDINATES.x,
+            VALID_COORDINATES.y, 
+            nullifierWitness, 
+            ledgerWitness
+            );
+          });
+        }).rejects.toThrow(Const.HOMEWORLD_ALREADY_INITIATED_ERROR);
+      })
+    });
+
+    it ('cannot initiate homeworlds outside of game radius', async () => {
+      let playerKey, 
+      nullifierWitness: MerkleMapWitness, 
+      ledgerWitness: MerkleMapWitness;
+
+      playerKey = initializeRandomPlayer();
+      nullifierWitness = nullifierMap.getWitness(playerKey);
+      ledgerWitness = ledgerMap.getWitness(playerKey);
+
+      txn = await Mina.transaction(senderAccount, () => {
+        zkAppInstance.addEligibleAddress(nullifierWitness);
+      });
+      await txn.prove();
+      await txn.sign([senderKey]).send();
+
+      expect(async () => {
+        txn = await Mina.transaction(senderAccount, () => {
+        zkAppInstance.initializePlanet(
+          INVALID_COORDINATES.x,
+          INVALID_COORDINATES.y, 
+          nullifierWitness, 
+          ledgerWitness
+          );
+        });
+      }).rejects.toThrow(Const.COORDINATE_OUT_OF_RANGE_ERROR);
     });
 
 });
-
-

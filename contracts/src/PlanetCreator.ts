@@ -100,7 +100,7 @@ export class PlanetCreator extends SmartContract {
     const xSquared = x.mul(x);
     const ySquared = y.mul(y);
     const rSquared = gameRadius.mul(gameRadius);
-    xSquared.add(ySquared).assertLessThan(rSquared);
+    xSquared.add(ySquared).assertLessThan(rSquared, Const.COORDINATE_OUT_OF_RANGE_ERROR);
 
     // STEP 4: make sure that the planet does not belong to someone else already
     const positionHash = Poseidon.hash([x, y]); 
