@@ -6,8 +6,8 @@ import {
 export namespace Const {
 
     // initial values
-    export const INITIAL_GAME_RADIUS = Field(1000);
-
+    export const INITIAL_GAME_RADIUS = Field(1000); // initiates pi * 1000 * 1000 grid 
+    export const INITIAL_GAME_LENGTH = Field(1000); // initiates 1000 x 1000 grid
 
 
     // game limitations 
@@ -15,6 +15,7 @@ export namespace Const {
     export const MAX_NUM_PLAYERS = 1000;
     export const MAX_LENGTH = 1000000;
     export const MAX_RADIUS = 1000000;
+    
 
     // determine how spread out the planets are
     export const DIFFICULTY_CUTOFF = Field(100000007457839956419684630393576868452302619104417668738877266031346568);

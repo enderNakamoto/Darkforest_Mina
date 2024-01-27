@@ -199,7 +199,7 @@ describe('PlanetCreator Contract', () => {
   
         expect(async () => {
           txn = await Mina.transaction(senderAccount, () => {
-          zkAppInstance.initializePlanet(
+          zkAppInstance.initializePlanetinCircularUniverse(
             VALID_COORDINATES.x,
             VALID_COORDINATES.y, 
             nullifierWitness, 
@@ -227,7 +227,7 @@ describe('PlanetCreator Contract', () => {
         await txn.sign([senderKey]).send();
   
         txn = await Mina.transaction(senderAccount, () => {
-        zkAppInstance.initializePlanet(
+        zkAppInstance.initializePlanetinCircularUniverse(
           VALID_COORDINATES.x,
           VALID_COORDINATES.y, 
           nullifierWitness, 
@@ -263,7 +263,7 @@ describe('PlanetCreator Contract', () => {
         await txn.sign([senderKey]).send();
   
         txn = await Mina.transaction(senderAccount, () => {
-        zkAppInstance.initializePlanet(
+        zkAppInstance.initializePlanetinCircularUniverse(
           VALID_COORDINATES.x,
           VALID_COORDINATES.y, 
           nullifierWitness, 
@@ -283,7 +283,7 @@ describe('PlanetCreator Contract', () => {
 
         expect(async () => {
           txn = await Mina.transaction(senderAccount, () => {
-          zkAppInstance.initializePlanet(
+          zkAppInstance.initializePlanetinCircularUniverse(
             VALID_COORDINATES.x,
             VALID_COORDINATES.y, 
             nullifierWitness, 
@@ -294,7 +294,7 @@ describe('PlanetCreator Contract', () => {
       })
     });
 
-    it ('cannot initiate homeworlds outside of game radius', async () => {
+    it ('cannot initiate homeworlds outside of game radius in circular universe', async () => {
       let playerKey, 
       nullifierWitness: MerkleMapWitness, 
       ledgerWitness: MerkleMapWitness;
@@ -311,7 +311,34 @@ describe('PlanetCreator Contract', () => {
 
       expect(async () => {
         txn = await Mina.transaction(senderAccount, () => {
-        zkAppInstance.initializePlanet(
+        zkAppInstance.initializePlanetinCircularUniverse(
+          INVALID_COORDINATES.x,
+          INVALID_COORDINATES.y, 
+          nullifierWitness, 
+          ledgerWitness
+          );
+        });
+      }).rejects.toThrow(Const.COORDINATE_OUT_OF_RANGE_ERROR);
+    });
+
+    it ('cannot initiate homeworlds outside of game radius in square universe', async () => {
+      let playerKey, 
+      nullifierWitness: MerkleMapWitness, 
+      ledgerWitness: MerkleMapWitness;
+
+      playerKey = initializeRandomPlayer();
+      nullifierWitness = nullifierMap.getWitness(playerKey);
+      ledgerWitness = ledgerMap.getWitness(playerKey);
+
+      txn = await Mina.transaction(senderAccount, () => {
+        zkAppInstance.addEligibleAddress(nullifierWitness);
+      });
+      await txn.prove();
+      await txn.sign([senderKey]).send();
+
+      expect(async () => {
+        txn = await Mina.transaction(senderAccount, () => {
+        zkAppInstance.initializePlanetinSquareUniverse(
           INVALID_COORDINATES.x,
           INVALID_COORDINATES.y, 
           nullifierWitness, 
