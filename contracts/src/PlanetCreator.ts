@@ -10,6 +10,7 @@ import {
    } from 'o1js';
 
 import { Const } from './helpers/const';
+import { PublicKey } from 'o1js/dist/node/provable/curve-bigint';
 
 export class Planet extends Struct({
   id: Field,
@@ -184,5 +185,19 @@ export class PlanetCreator extends SmartContract {
   }
 
 
+  // TODO: add a function to check if the planet is within the game limits (square) 
+  @method attackPlanetSquareUniverse(
+    target_x: Field, 
+    target_y: Field,
+  ) {
+
+      // STEP 1: check if the target planet exists
+      // STEP 2: check if the target planet is within the game limits
+      // STEP 3: check if the attacker has enough population to attack
+      const gameLength = this.gameLength.getAndRequireEquals();
+
+      target_x.assertLessThan(gameLength, Const.COORDINATE_OUT_OF_RANGE_ERROR);
+      target_y.assertLessThan(gameLength, Const.COORDINATE_OUT_OF_RANGE_ERROR);
+  }
 
 }
