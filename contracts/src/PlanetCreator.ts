@@ -33,6 +33,11 @@ export class PlanetCreator extends SmartContract {
   @state(Field) planetLedgerRoot = State<Field>(); // player address (key) and planetPosition (value)
   @state(Field) playerNullifierRoot = State<Field>(); // player address (key) and nullifier (value)
 
+  // events 
+  events = {
+    'homeworld-initiated': Field,
+  };
+
 
   init() {
     super.init();
@@ -120,6 +125,9 @@ export class PlanetCreator extends SmartContract {
     // STEP 7: update playerNullifier to show player has initiated a homeworld
     [ nullRootAfter, _ ] = nullifierKeyWitness.computeRootAndKey(Const.HOMEWORLD_SET_VALUE);
     this.playerNullifierRoot.set(nullRootAfter);
+
+    // STEP 8: emit event
+    this.emitEvent('homeworld-initiated', positionHash);
   }
 
 
@@ -170,6 +178,11 @@ export class PlanetCreator extends SmartContract {
     // STEP 7: update playerNullifier to show player has initiated a homeworld
     [ nullRootAfter, _ ] = nullifierKeyWitness.computeRootAndKey(Const.HOMEWORLD_SET_VALUE);
     this.playerNullifierRoot.set(nullRootAfter);
+
+    // STEP 8: emit event
+    this.emitEvent('homeworld-initiated', positionHash);
   }
+
+
 
 }
