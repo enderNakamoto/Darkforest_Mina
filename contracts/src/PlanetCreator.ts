@@ -6,11 +6,11 @@ import {
     method, 
     Struct, 
     Poseidon,
+    Bool,
     MerkleMapWitness
    } from 'o1js';
 
 import { Const } from './helpers/const';
-import { PublicKey } from 'o1js/dist/node/provable/curve-bigint';
 
 export class Planet extends Struct({
   id: Field,
@@ -21,6 +21,7 @@ export class Planet extends Struct({
   oreCap: Field,
   oreGrowth: Field,
 }){ }
+
 
 export class PlanetCreator extends SmartContract {
 
@@ -33,6 +34,7 @@ export class PlanetCreator extends SmartContract {
   // Merkle Map to store player Address (Key) and Planet (value), to store who owns which planet
   @state(Field) planetLedgerRoot = State<Field>(); // player address (key) and planetPosition (value)
   @state(Field) playerNullifierRoot = State<Field>(); // player address (key) and nullifier (value)
+  @state(Field) planetDetailsRoot = State<Field>(); // planet Position (key) and planet Details Hash (value)
 
   // events 
   events = {
@@ -87,10 +89,11 @@ export class PlanetCreator extends SmartContract {
   @method initializePlanetinCircularUniverse(
     x: Field, 
     y: Field,
+    planet: Planet,
     nullifierKeyWitness: MerkleMapWitness, 
     ledgerKeyWitness: MerkleMapWitness
     ) {
-    let derivedNullRoot, nullRootAfter, ledgerRootAfter, _; 
+    let derivedNullRoot, nullRootAfter, ledgerRootAfter, detailsRootAfter, _; 
 
     // STEP 1: check if the number of planets reached MAX_NUM_PLANETS
     let planetsNumBefore = this.numberOfPlanets.getAndRequireEquals();
@@ -115,10 +118,20 @@ export class PlanetCreator extends SmartContract {
     const initialRoot = this.planetLedgerRoot.getAndRequireEquals();
     //  TO DO : check if the planet already exists, does not belong to someone else
 
+    planet.population.assertEquals(Const.INITIAL_POPULATION, Const.PLANET_INIT_WRONG_VALUES);
+    planet.populationCap.assertEquals(Const.INITIAL_POPULATION_CAP, Const.PLANET_INIT_WRONG_VALUES);
+    planet.populationGrowth.assertEquals(Const.INITIAL_POPULATION_GROWTH, Const.PLANET_INIT_WRONG_VALUES);
+    planet.ore.assertEquals(Const.INITIAL_ORE, Const.PLANET_INIT_WRONG_VALUES);
+    planet.oreCap.assertEquals(Const.INITIAL_ORE_CAP, Const.PLANET_INIT_WRONG_VALUES);
+    planet.oreGrowth.assertEquals(Const.INITIAL_ORE_GROWTH, Const.PLANET_INIT_WRONG_VALUES);
+
+    const planetDetailsHash = Poseidon.hash(Planet.toFields(planet));
+    [ detailsRootAfter, _ ] = detailKeyWitness.computeRootAndKey(planetDetailsHash);
+    this.planetDetailsRoot.set(detailsRootAfter);
+
    // STEP 5: add the planet to the merkle map, by updating the root   
     [ ledgerRootAfter, _ ] = ledgerKeyWitness.computeRootAndKey(positionHash);
     this.planetLedgerRoot.set(ledgerRootAfter);
-
 
     // STEP 6: increment the number of planets
     this.numberOfPlanets.set(planetsNumBefore.add(Field(1)));
@@ -142,10 +155,12 @@ export class PlanetCreator extends SmartContract {
   @method initializePlanetinSquareUniverse(
     x: Field, 
     y: Field,
+    planet: Planet,
     nullifierKeyWitness: MerkleMapWitness, 
+    detailKeyWitness: MerkleMapWitness,
     ledgerKeyWitness: MerkleMapWitness
     ) {
-    let derivedNullRoot, nullRootAfter, ledgerRootAfter, _; 
+    let derivedNullRoot, nullRootAfter, ledgerRootAfter, detailsRootAfter, _; 
 
     // STEP 1: check if the number of planets reached MAX_NUM_PLANETS
     let planetsNumBefore = this.numberOfPlanets.getAndRequireEquals();
@@ -168,9 +183,21 @@ export class PlanetCreator extends SmartContract {
     const initialRoot = this.planetLedgerRoot.getAndRequireEquals();
     //  TO DO : check if the planet already exists, does not belong to someone else
 
+    planet.population.assertEquals(Const.INITIAL_POPULATION, Const.PLANET_INIT_WRONG_VALUES);
+    planet.populationCap.assertEquals(Const.INITIAL_POPULATION_CAP, Const.PLANET_INIT_WRONG_VALUES);
+    planet.populationGrowth.assertEquals(Const.INITIAL_POPULATION_GROWTH, Const.PLANET_INIT_WRONG_VALUES);
+    planet.ore.assertEquals(Const.INITIAL_ORE, Const.PLANET_INIT_WRONG_VALUES);
+    planet.oreCap.assertEquals(Const.INITIAL_ORE_CAP, Const.PLANET_INIT_WRONG_VALUES);
+    planet.oreGrowth.assertEquals(Const.INITIAL_ORE_GROWTH, Const.PLANET_INIT_WRONG_VALUES);
+
    // STEP 5: add the planet to the merkle map, by updating the root   
     [ ledgerRootAfter, _ ] = ledgerKeyWitness.computeRootAndKey(positionHash);
     this.planetLedgerRoot.set(ledgerRootAfter);
+
+
+    const planetDetailsHash = Poseidon.hash(Planet.toFields(planet));
+    [ detailsRootAfter, _ ] = detailKeyWitness.computeRootAndKey(planetDetailsHash);
+    this.planetDetailsRoot.set(detailsRootAfter);
 
 
     // STEP 6: increment the number of planets
@@ -185,15 +212,15 @@ export class PlanetCreator extends SmartContract {
   }
 
 
-  // TODO: add a function to check if the planet is within the game limits (square) 
+  // TODO: 
+  // 1. Make sure that the planet exists in the game
+  // 2. Make sure that the planet is within the game radius
+  // 3. Make sure that the planet is not occupoied by the same player
+  // 4. Make sure that the attacker has enough troops to attack
   @method attackPlanetSquareUniverse(
     target_x: Field, 
     target_y: Field,
   ) {
-
-      // STEP 1: check if the target planet exists
-      // STEP 2: check if the target planet is within the game limits
-      // STEP 3: check if the attacker has enough population to attack
       const gameLength = this.gameLength.getAndRequireEquals();
 
       target_x.assertLessThan(gameLength, Const.COORDINATE_OUT_OF_RANGE_ERROR);
