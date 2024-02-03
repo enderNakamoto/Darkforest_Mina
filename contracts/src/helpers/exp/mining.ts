@@ -38,6 +38,28 @@ function hashCoordinatesPoseidon(coordinates: {x: number, y: number}[]) {
     }
 }
 
+
+// test Poseidon Chain hash, hash with itself chainLength times
+function chainHashPoseidon(coordinates: {x: number, y: number}[], chainLength: number) {
+  let currentHash = Poseidon.hash([Field(coordinates[0].x),Field(coordinates[0].y)]);
+
+  for (let i = 1; i < chainLength; i++) {
+      currentHash = Poseidon.hash([currentHash, currentHash]);
+  }
+    return currentHash;
+}
+
+// test Poseidon Chain hash
+function hashChainCoordinatesPoseidon(coordinates: {x: number, y: number}[], chainLength: number) {
+    console.log('-------------------');
+    console.log(`hashing ${coordinates.length} coordinates, ${chainLength} times`);
+    let hashes = [];
+    for (let i = 0; i < coordinates.length; i++) {
+        const hash = chainHashPoseidon(coordinates, chainLength);
+        hashes.push(hash);
+    }
+}
+
 function benchmarkHashingPoseidon(num: number) {
     console.log('-------------------');
     console.log(`benchmarking hashing ${num} coordinates`);
@@ -74,7 +96,6 @@ function benchmarkHashingKeccak(num: number) {
 
 
 // test Keccak hash
-
 function hashCoordinatesSha256(coordinates: {x: number, y: number}[]) {
     console.log('-------------------');
     console.log(`hashing ${coordinates.length} coordinates`);
@@ -96,7 +117,19 @@ function benchmarkHashingSha256(num: number) {
     console.log(`time taken to hash ${num} coordinates: ${end - start} ms`);
  }
 
+ function benchmarChainPoseidonkHashing(num: number, chainLength: number) {
+    console.log('-------------------');
+    console.log(`benchmarking hashing ${num} coordinates`);
+    let coordinates = generateRandomCoordinates(num);
+    const start = Date.now();
+    hashChainCoordinatesPoseidon(coordinates, chainLength);
+    const end = Date.now();
+    console.log(`time taken to hash ${num} coordinates: ${end - start} ms`);
+ }
+
+
 
 // benchmarkHashingPoseidon(100000);
 // benchmarkHashingKeccak(1000);
-benchmarkHashingSha256(100);
+// benchmarkHashingSha256(100);
+benchmarChainPoseidonkHashing(100, 1000);

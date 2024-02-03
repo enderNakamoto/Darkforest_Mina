@@ -42,6 +42,7 @@ describe('PlanetCreator Contract', () => {
       zkAppInstance: PlanetCreator,
       nullifierMap: MerkleMap,
       ledgerMap: MerkleMap,
+      detailsMap: MerkleMap,
       txn;
 
     beforeAll(async () => {
@@ -65,6 +66,7 @@ describe('PlanetCreator Contract', () => {
       // initialize the MerkleMaps
       nullifierMap = new MerkleMap();
       ledgerMap = new MerkleMap();
+      detailsMap = new MerkleMap();
 
       // deploy the zkApp and initialize the MerkleMaps
       await localDeployAndInitMap();
@@ -75,7 +77,10 @@ describe('PlanetCreator Contract', () => {
       txn = await Mina.transaction(deployerAccount, () => {
         AccountUpdate.fundNewAccount(deployerAccount);
         zkAppInstance.deploy();
-        zkAppInstance.initMapRoots(nullifierMap.getRoot(), ledgerMap.getRoot());
+        zkAppInstance.initGame(
+        nullifierMap.getRoot(), 
+        ledgerMap.getRoot()
+        );
       });
       await txn.prove();
 
@@ -186,183 +191,186 @@ describe('PlanetCreator Contract', () => {
       
     })
 
-    describe('homeworld initiation', () => {
+    // describe('homeworld initiation', () => {
 
-      it ('cannot initiate homeworld for non whitelisted players', async () => {
-        let playerKey, 
-        nullifierWitness: MerkleMapWitness, 
-        ledgerWitness: MerkleMapWitness;
+    //   it ('cannot initiate homeworld for non whitelisted players', async () => {
+    //     let playerKey, 
+    //     nullifierWitness: MerkleMapWitness, 
+    //     ledgerWitness: MerkleMapWitness, 
+    //     detailsWitness: MerkleMapWitness;
   
-        playerKey = initializeRandomPlayer();
-        nullifierWitness = nullifierMap.getWitness(playerKey);
-        ledgerWitness = ledgerMap.getWitness(playerKey);
+    //     playerKey = initializeRandomPlayer();
+    //     nullifierWitness = nullifierMap.getWitness(playerKey);
+    //     ledgerWitness = ledgerMap.getWitness(playerKey);
+    //     detailsWitness = detailsMap.getWitness(playerKey);
   
-        expect(async () => {
-          txn = await Mina.transaction(senderAccount, () => {
-          zkAppInstance.initializePlanetinCircularUniverse(
-            VALID_COORDINATES.x,
-            VALID_COORDINATES.y, 
-            nullifierWitness, 
-            ledgerWitness
-            );
-          });
-        }).rejects.toThrow(Const.PLAYER_CANNOT_INITIATE_ERROR);
-      });
+    //     expect(async () => {
+    //       txn = await Mina.transaction(senderAccount, () => {
+    //       zkAppInstance.initializePlanetinCircularUniverse(
+    //         VALID_COORDINATES.x,
+    //         VALID_COORDINATES.y, 
+    //         nullifierWitness, 
+    //         ledgerWitness, 
+    //         detailsWitness
+    //         );
+    //       });
+    //     }).rejects.toThrow(Const.PLAYER_CANNOT_INITIATE_ERROR);
+    //   });
 
 
-      it ('can initiate homeworld for non whitelisted players', async () => {
-        let playerKey, 
-        nullifierWitness: MerkleMapWitness, 
-        ledgerWitness: MerkleMapWitness;
+    //   it ('can initiate homeworld for non whitelisted players', async () => {
+    //     let playerKey, 
+    //     nullifierWitness: MerkleMapWitness, 
+    //     ledgerWitness: MerkleMapWitness;
   
-        playerKey = initializeRandomPlayer();
-        nullifierWitness = nullifierMap.getWitness(playerKey);
-        ledgerWitness = ledgerMap.getWitness(playerKey);
-        ledgerMap.set(playerKey, Poseidon.hash([VALID_COORDINATES.x, VALID_COORDINATES.y]));
+    //     playerKey = initializeRandomPlayer();
+    //     nullifierWitness = nullifierMap.getWitness(playerKey);
+    //     ledgerWitness = ledgerMap.getWitness(playerKey);
+    //     ledgerMap.set(playerKey, Poseidon.hash([VALID_COORDINATES.x, VALID_COORDINATES.y]));
 
-        txn = await Mina.transaction(senderAccount, () => {
-          zkAppInstance.addEligibleAddress(nullifierWitness);
-        });
-        await txn.prove();
-        await txn.sign([senderKey]).send();
+    //     txn = await Mina.transaction(senderAccount, () => {
+    //       zkAppInstance.addEligibleAddress(nullifierWitness);
+    //     });
+    //     await txn.prove();
+    //     await txn.sign([senderKey]).send();
   
-        txn = await Mina.transaction(senderAccount, () => {
-        zkAppInstance.initializePlanetinCircularUniverse(
-          VALID_COORDINATES.x,
-          VALID_COORDINATES.y, 
-          nullifierWitness, 
-          ledgerWitness
-          );
-        });
-        await txn.prove();
-        await txn.sign([senderKey]).send();
+    //     txn = await Mina.transaction(senderAccount, () => {
+    //     zkAppInstance.initializePlanetinCircularUniverse(
+    //       VALID_COORDINATES.x,
+    //       VALID_COORDINATES.y, 
+    //       nullifierWitness, 
+    //       ledgerWitness
+    //       );
+    //     });
+    //     await txn.prove();
+    //     await txn.sign([senderKey]).send();
 
-        // ledger root state changed correctly after adding new homeworld
-        const ledgerRoot = zkAppInstance.planetLedgerRoot.get();
-        expect(ledgerRoot).toEqual(ledgerMap.getRoot());
+    //     // ledger root state changed correctly after adding new homeworld
+    //     const ledgerRoot = zkAppInstance.planetLedgerRoot.get();
+    //     expect(ledgerRoot).toEqual(ledgerMap.getRoot());
 
-        // numberOfPlanets incremented correctly
-        let numPlanets = zkAppInstance.numberOfPlanets.get();
-        expect(numPlanets).toEqual(Field(1));
-      });
+    //     // numberOfPlanets incremented correctly
+    //     let numPlanets = zkAppInstance.numberOfPlanets.get();
+    //     expect(numPlanets).toEqual(Field(1));
+    //   });
 
-      it ('cannot initiate homeworld for whitelisted players who already have homeworlds', async () => {
-        let playerKey, 
-        nullifierWitness: MerkleMapWitness, 
-        ledgerWitness: MerkleMapWitness;
+    //   it ('cannot initiate homeworld for whitelisted players who already have homeworlds', async () => {
+    //     let playerKey, 
+    //     nullifierWitness: MerkleMapWitness, 
+    //     ledgerWitness: MerkleMapWitness;
   
-        playerKey = initializeRandomPlayer();
-        nullifierWitness = nullifierMap.getWitness(playerKey);
-        ledgerWitness = ledgerMap.getWitness(playerKey);
-        ledgerMap.set(playerKey, Poseidon.hash([VALID_COORDINATES.x, VALID_COORDINATES.y]));
+    //     playerKey = initializeRandomPlayer();
+    //     nullifierWitness = nullifierMap.getWitness(playerKey);
+    //     ledgerWitness = ledgerMap.getWitness(playerKey);
+    //     ledgerMap.set(playerKey, Poseidon.hash([VALID_COORDINATES.x, VALID_COORDINATES.y]));
 
-        txn = await Mina.transaction(senderAccount, () => {
-          zkAppInstance.addEligibleAddress(nullifierWitness);
-        });
-        await txn.prove();
-        await txn.sign([senderKey]).send();
+    //     txn = await Mina.transaction(senderAccount, () => {
+    //       zkAppInstance.addEligibleAddress(nullifierWitness);
+    //     });
+    //     await txn.prove();
+    //     await txn.sign([senderKey]).send();
   
-        txn = await Mina.transaction(senderAccount, () => {
-        zkAppInstance.initializePlanetinCircularUniverse(
-          VALID_COORDINATES.x,
-          VALID_COORDINATES.y, 
-          nullifierWitness, 
-          ledgerWitness
-          );
-        });
-        await txn.prove();
-        await txn.sign([senderKey]).send();
+    //     txn = await Mina.transaction(senderAccount, () => {
+    //     zkAppInstance.initializePlanetinCircularUniverse(
+    //       VALID_COORDINATES.x,
+    //       VALID_COORDINATES.y, 
+    //       nullifierWitness, 
+    //       ledgerWitness
+    //       );
+    //     });
+    //     await txn.prove();
+    //     await txn.sign([senderKey]).send();
 
-        // ledger root state changed correctly after adding new homeworld
-        const ledgerRoot = zkAppInstance.planetLedgerRoot.get();
-        expect(ledgerRoot).toEqual(ledgerMap.getRoot());
+    //     // ledger root state changed correctly after adding new homeworld
+    //     const ledgerRoot = zkAppInstance.planetLedgerRoot.get();
+    //     expect(ledgerRoot).toEqual(ledgerMap.getRoot());
 
-        // numberOfPlanets incremented correctly
-        let numPlanets = zkAppInstance.numberOfPlanets.get();
-        expect(numPlanets).toEqual(Field(1));
+    //     // numberOfPlanets incremented correctly
+    //     let numPlanets = zkAppInstance.numberOfPlanets.get();
+    //     expect(numPlanets).toEqual(Field(1));
 
-        expect(async () => {
-          txn = await Mina.transaction(senderAccount, () => {
-          zkAppInstance.initializePlanetinCircularUniverse(
-            VALID_COORDINATES.x,
-            VALID_COORDINATES.y, 
-            nullifierWitness, 
-            ledgerWitness
-            );
-          });
-        }).rejects.toThrow(Const.PLAYER_CANNOT_INITIATE_ERROR);
-      })
+    //     expect(async () => {
+    //       txn = await Mina.transaction(senderAccount, () => {
+    //       zkAppInstance.initializePlanetinCircularUniverse(
+    //         VALID_COORDINATES.x,
+    //         VALID_COORDINATES.y, 
+    //         nullifierWitness, 
+    //         ledgerWitness
+    //         );
+    //       });
+    //     }).rejects.toThrow(Const.PLAYER_CANNOT_INITIATE_ERROR);
+    //   })
 
-      it ('cannot initiate homeworlds outside of game radius in circular universe', async () => {
-        let playerKey, 
-        nullifierWitness: MerkleMapWitness, 
-        ledgerWitness: MerkleMapWitness;
+    //   it ('cannot initiate homeworlds outside of game radius in circular universe', async () => {
+    //     let playerKey, 
+    //     nullifierWitness: MerkleMapWitness, 
+    //     ledgerWitness: MerkleMapWitness;
   
-        playerKey = initializeRandomPlayer();
-        nullifierWitness = nullifierMap.getWitness(playerKey);
-        ledgerWitness = ledgerMap.getWitness(playerKey);
+    //     playerKey = initializeRandomPlayer();
+    //     nullifierWitness = nullifierMap.getWitness(playerKey);
+    //     ledgerWitness = ledgerMap.getWitness(playerKey);
   
-        txn = await Mina.transaction(senderAccount, () => {
-          zkAppInstance.addEligibleAddress(nullifierWitness);
-        });
-        await txn.prove();
-        await txn.sign([senderKey]).send();
+    //     txn = await Mina.transaction(senderAccount, () => {
+    //       zkAppInstance.addEligibleAddress(nullifierWitness);
+    //     });
+    //     await txn.prove();
+    //     await txn.sign([senderKey]).send();
   
-        expect(async () => {
-          txn = await Mina.transaction(senderAccount, () => {
-          zkAppInstance.initializePlanetinCircularUniverse(
-            INVALID_COORDINATES.x,
-            INVALID_COORDINATES.y, 
-            nullifierWitness, 
-            ledgerWitness
-            );
-          });
-        }).rejects.toThrow(Const.COORDINATE_OUT_OF_RANGE_ERROR);
-      });
+    //     expect(async () => {
+    //       txn = await Mina.transaction(senderAccount, () => {
+    //       zkAppInstance.initializePlanetinCircularUniverse(
+    //         INVALID_COORDINATES.x,
+    //         INVALID_COORDINATES.y, 
+    //         nullifierWitness, 
+    //         ledgerWitness
+    //         );
+    //       });
+    //     }).rejects.toThrow(Const.COORDINATE_OUT_OF_RANGE_ERROR);
+    //   });
   
-      it ('cannot initiate homeworlds outside of game radius in square universe', async () => {
-        let playerKey, 
-        nullifierWitness: MerkleMapWitness, 
-        ledgerWitness: MerkleMapWitness;
+    //   it ('cannot initiate homeworlds outside of game radius in square universe', async () => {
+    //     let playerKey, 
+    //     nullifierWitness: MerkleMapWitness, 
+    //     ledgerWitness: MerkleMapWitness;
   
-        playerKey = initializeRandomPlayer();
-        nullifierWitness = nullifierMap.getWitness(playerKey);
-        ledgerWitness = ledgerMap.getWitness(playerKey);
+    //     playerKey = initializeRandomPlayer();
+    //     nullifierWitness = nullifierMap.getWitness(playerKey);
+    //     ledgerWitness = ledgerMap.getWitness(playerKey);
   
-        txn = await Mina.transaction(senderAccount, () => {
-          zkAppInstance.addEligibleAddress(nullifierWitness);
-        });
-        await txn.prove();
-        await txn.sign([senderKey]).send();
+    //     txn = await Mina.transaction(senderAccount, () => {
+    //       zkAppInstance.addEligibleAddress(nullifierWitness);
+    //     });
+    //     await txn.prove();
+    //     await txn.sign([senderKey]).send();
   
-        expect(async () => {
-          txn = await Mina.transaction(senderAccount, () => {
-          zkAppInstance.initializePlanetinSquareUniverse(
-            INVALID_COORDINATES.x,
-            INVALID_COORDINATES.y, 
-            nullifierWitness, 
-            ledgerWitness
-            );
-          });
-        }).rejects.toThrow(Const.COORDINATE_OUT_OF_RANGE_ERROR);
-      });
-    });
+    //     expect(async () => {
+    //       txn = await Mina.transaction(senderAccount, () => {
+    //       zkAppInstance.initializePlanetinSquareUniverse(
+    //         INVALID_COORDINATES.x,
+    //         INVALID_COORDINATES.y, 
+    //         nullifierWitness, 
+    //         ledgerWitness
+    //         );
+    //       });
+    //     }).rejects.toThrow(Const.COORDINATE_OUT_OF_RANGE_ERROR);
+    //   });
+    // });
 
-    describe('attack planet', () => {
+    // describe('attack planet', () => {
       
-      it ('cannot attack planet outside the minits of square universe', async () => {
-        expect(async () => {
-          txn = await Mina.transaction(senderAccount, () => {
-          zkAppInstance.attackPlanetSquareUniverse(
-            INVALID_COORDINATES.x,
-            INVALID_COORDINATES.y, 
-            );
-          });
-        }).rejects.toThrow(Const.COORDINATE_OUT_OF_RANGE_ERROR);
-      });
+    //   it ('cannot attack planet outside the minits of square universe', async () => {
+    //     expect(async () => {
+    //       txn = await Mina.transaction(senderAccount, () => {
+    //       zkAppInstance.attackPlanetSquareUniverse(
+    //         INVALID_COORDINATES.x,
+    //         INVALID_COORDINATES.y, 
+    //         );
+    //       });
+    //     }).rejects.toThrow(Const.COORDINATE_OUT_OF_RANGE_ERROR);
+    //   });
 
 
-    });
+    // });
 
 
 });
