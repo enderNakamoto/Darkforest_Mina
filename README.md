@@ -96,6 +96,17 @@ Hashing with `Hash.SHA3_256.hash(bytes), Hash.SHA3_512.hash(bytes) and Hash.SHA3
 
 Therefore, it might be better to use the Keccak hash to save planet locations publicly to add extra layer of protection. Ironically, because Keccak is less efficient, it yields better protection.
 
+According to [Shigoto-dev19](https://github.com/Shigoto-dev19)'s, recommenation we should probably just use Poseidon chain hash - that is to create a final hash, we can hash the function to itself N number of times to increase the time 
+
+### Chain Poseidon (1000) on M1 Mac 
+* time taken to hash 100 coordinates: 25062 ms
+
+We can arbitrarily increase the time needed to hash every co-ordinate to make this super hard for anyone to bruteforce all the co-ordinates in the map easily 
+
+e.g. hashing 100,000 times -  100 co-ordinates mwill take more than 4 minutes. 
+
+Given a big enough universe, it would be quite hard for anyone to bruteforce all the co-ordinates.
+
 ## Game Notes
 
 ### TODO for Planet initialization
