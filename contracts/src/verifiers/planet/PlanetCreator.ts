@@ -11,6 +11,7 @@ import {
    } from 'o1js';
 
 import { Const } from '../../utils/const';
+import { Errors } from '../../utils/errors';
 
 export class Planet extends Struct({
   id: Field,
@@ -67,7 +68,7 @@ export class PlanetCreator extends SmartContract {
 
     // STEP 0: check if the sender is admin
     const currentSender = Poseidon.hash(this.sender.toFields());
-    this.admin.getAndRequireEquals().assertEquals(currentSender, Const.NOT_ADMIN_ERROR);
+    this.admin.getAndRequireEquals().assertEquals(currentSender, Errors.NOT_ADMIN_ERROR);
 
     // STEP 1: check if the number of addresses reached MAX_NUM_PLANETS
     let playersNumBefore = this.numberOfWhiteListedPlayers.getAndRequireEquals();
@@ -76,7 +77,7 @@ export class PlanetCreator extends SmartContract {
     // STEP 2: check if the address is already in the whitelist, or has initiated a homeworld
     let nullRootBefore = this.playerNullifierRoot.getAndRequireEquals();
     [ derivedNullRoot, _ ] = keyWitness.computeRootAndKey(Const.UNINITIALIZED_VALUE);
-    derivedNullRoot.assertEquals(nullRootBefore, Const.ALREADY_WHITELISTED_ERROR);
+    derivedNullRoot.assertEquals(nullRootBefore, Errors.ALREADY_WHITELISTED_ERROR);
 
     // STEP 3: add whitelist address to the merkle map, by updating the root
      [ nullRootAfter, _ ] = keyWitness.computeRootAndKey(Const.WHITELISTED_VALUE);
@@ -105,15 +106,15 @@ export class PlanetCreator extends SmartContract {
 
       // STEP 1: check if the number of planets reached MAX_NUM_PLANETS
       let planetsNumBefore = this.numberOfPlanets.getAndRequireEquals();
-      planetsNumBefore.assertLessThan(Const.MAX_NUM_PLANETS, Const.MAX_NUM_PLANETS_ERROR);
+      planetsNumBefore.assertLessThan(Const.MAX_NUM_PLANETS, Errors.MAX_NUM_PLANETS_ERROR);
   
       // STEP 2: check if the player is in the whitelist, and has not initiated a homeworld
       const currentPlayer = Poseidon.hash(this.sender.toFields());
       let nullRootBefore = this.playerNullifierRoot.getAndRequireEquals();
   
       [ derivedNullRoot, derivedNullKey ] = nullifierKeyWitness.computeRootAndKey(Const.WHITELISTED_VALUE);
-      derivedNullRoot.assertEquals(nullRootBefore, Const.PLAYER_CANNOT_INITIATE_ERROR);
-      derivedNullKey.assertEquals(currentPlayer, Const.PLAYER_CANNOT_INITIATE_ERROR);
+      derivedNullRoot.assertEquals(nullRootBefore, Errors.PLAYER_CANNOT_INITIATE_ERROR);
+      derivedNullKey.assertEquals(currentPlayer, Errors.PLAYER_CANNOT_INITIATE_ERROR);
     
 
     // STEP 3: check if the coordinate is within the game radius
@@ -122,19 +123,19 @@ export class PlanetCreator extends SmartContract {
     const xSquared = x.mul(x);
     const ySquared = y.mul(y);
     const rSquared = gameRadius.mul(gameRadius);
-    xSquared.add(ySquared).assertLessThan(rSquared, Const.COORDINATE_OUT_OF_RANGE_ERROR);
+    xSquared.add(ySquared).assertLessThan(rSquared, Errors.COORDINATE_OUT_OF_RANGE_ERROR);
 
     // STEP 4: make sure that the planet does not belong to someone else already
     const positionHash = Poseidon.hash([x, y]); 
     const initialRoot = this.planetLedgerRoot.getAndRequireEquals();
     //  TO DO : check if the planet already exists, does not belong to someone else
 
-    planet.population.assertEquals(Const.INITIAL_POPULATION, Const.PLANET_INIT_WRONG_VALUES_ERROR);
-    planet.populationCap.assertEquals(Const.INITIAL_POPULATION_CAP, Const.PLANET_INIT_WRONG_VALUES_ERROR);
-    planet.populationGrowth.assertEquals(Const.INITIAL_POPULATION_GROWTH, Const.PLANET_INIT_WRONG_VALUES_ERROR);
-    planet.ore.assertEquals(Const.INITIAL_ORE, Const.PLANET_INIT_WRONG_VALUES_ERROR);
-    planet.oreCap.assertEquals(Const.INITIAL_ORE_CAP, Const.PLANET_INIT_WRONG_VALUES_ERROR);
-    planet.oreGrowth.assertEquals(Const.INITIAL_ORE_GROWTH, Const.PLANET_INIT_WRONG_VALUES_ERROR);
+    planet.population.assertEquals(Const.INITIAL_POPULATION, Errors.PLANET_INIT_WRONG_VALUES_ERROR);
+    planet.populationCap.assertEquals(Const.INITIAL_POPULATION_CAP, Errors.PLANET_INIT_WRONG_VALUES_ERROR);
+    planet.populationGrowth.assertEquals(Const.INITIAL_POPULATION_GROWTH, Errors.PLANET_INIT_WRONG_VALUES_ERROR);
+    planet.ore.assertEquals(Const.INITIAL_ORE, Errors.PLANET_INIT_WRONG_VALUES_ERROR);
+    planet.oreCap.assertEquals(Const.INITIAL_ORE_CAP, Errors.PLANET_INIT_WRONG_VALUES_ERROR);
+    planet.oreGrowth.assertEquals(Const.INITIAL_ORE_GROWTH, Errors.PLANET_INIT_WRONG_VALUES_ERROR);
 
     const planetDetailsHash = Poseidon.hash(Planet.toFields(planet));
     [ detailsRootAfter, _ ] = detailKeyWitness.computeRootAndKey(planetDetailsHash);
@@ -175,34 +176,34 @@ export class PlanetCreator extends SmartContract {
 
     // STEP 1: check if the number of planets reached MAX_NUM_PLANETS
     let planetsNumBefore = this.numberOfPlanets.getAndRequireEquals();
-    planetsNumBefore.assertLessThan(Const.MAX_NUM_PLANETS, Const.MAX_NUM_PLANETS_ERROR);
+    planetsNumBefore.assertLessThan(Const.MAX_NUM_PLANETS, Errors.MAX_NUM_PLANETS_ERROR);
 
     // STEP 2: check if the player is in the whitelist, and has not initiated a homeworld
     const currentPlayer = Poseidon.hash(this.sender.toFields());
     let nullRootBefore = this.playerNullifierRoot.getAndRequireEquals();
 
     [ derivedNullRoot, derivedNullKey ] = nullifierKeyWitness.computeRootAndKey(Const.WHITELISTED_VALUE);
-    derivedNullRoot.assertEquals(nullRootBefore, Const.PLAYER_CANNOT_INITIATE_ERROR);
-    derivedNullKey.assertEquals(currentPlayer, Const.PLAYER_CANNOT_INITIATE_ERROR);
+    derivedNullRoot.assertEquals(nullRootBefore, Errors.PLAYER_CANNOT_INITIATE_ERROR);
+    derivedNullKey.assertEquals(currentPlayer, Errors.PLAYER_CANNOT_INITIATE_ERROR);
     
 
     // STEP 3: check if the coordinate is within the game radius
     const gameLength = this.gameLength.getAndRequireEquals();
 
-    x.assertLessThan(gameLength, Const.COORDINATE_OUT_OF_RANGE_ERROR);
-    y.assertLessThan(gameLength, Const.COORDINATE_OUT_OF_RANGE_ERROR);
+    x.assertLessThan(gameLength, Errors.COORDINATE_OUT_OF_RANGE_ERROR);
+    y.assertLessThan(gameLength, Errors.COORDINATE_OUT_OF_RANGE_ERROR);
 
     // STEP 4: make sure that the planet does not belong to someone else already
     const positionHash = Poseidon.hash([x, y]); 
     const initialRoot = this.planetLedgerRoot.getAndRequireEquals();
     //  TO DO : check if the planet already exists, does not belong to someone else
 
-    planet.population.assertEquals(Const.INITIAL_POPULATION, Const.PLANET_INIT_WRONG_VALUES_ERROR);
-    planet.populationCap.assertEquals(Const.INITIAL_POPULATION_CAP, Const.PLANET_INIT_WRONG_VALUES_ERROR);
-    planet.populationGrowth.assertEquals(Const.INITIAL_POPULATION_GROWTH, Const.PLANET_INIT_WRONG_VALUES_ERROR);
-    planet.ore.assertEquals(Const.INITIAL_ORE, Const.PLANET_INIT_WRONG_VALUES_ERROR);
-    planet.oreCap.assertEquals(Const.INITIAL_ORE_CAP, Const.PLANET_INIT_WRONG_VALUES_ERROR);
-    planet.oreGrowth.assertEquals(Const.INITIAL_ORE_GROWTH, Const.PLANET_INIT_WRONG_VALUES_ERROR);
+    planet.population.assertEquals(Const.INITIAL_POPULATION, Errors.PLANET_INIT_WRONG_VALUES_ERROR);
+    planet.populationCap.assertEquals(Const.INITIAL_POPULATION_CAP, Errors.PLANET_INIT_WRONG_VALUES_ERROR);
+    planet.populationGrowth.assertEquals(Const.INITIAL_POPULATION_GROWTH, Errors.PLANET_INIT_WRONG_VALUES_ERROR);
+    planet.ore.assertEquals(Const.INITIAL_ORE, Errors.PLANET_INIT_WRONG_VALUES_ERROR);
+    planet.oreCap.assertEquals(Const.INITIAL_ORE_CAP, Errors.PLANET_INIT_WRONG_VALUES_ERROR);
+    planet.oreGrowth.assertEquals(Const.INITIAL_ORE_GROWTH, Errors.PLANET_INIT_WRONG_VALUES_ERROR);
 
    // STEP 5: add the planet to the merkle map, by updating the root   
     [ ledgerRootAfter, _ ] = ledgerKeyWitness.computeRootAndKey(positionHash);
@@ -237,8 +238,8 @@ export class PlanetCreator extends SmartContract {
   ) {
       const gameLength = this.gameLength.getAndRequireEquals();
 
-      target_x.assertLessThan(gameLength, Const.COORDINATE_OUT_OF_RANGE_ERROR);
-      target_y.assertLessThan(gameLength, Const.COORDINATE_OUT_OF_RANGE_ERROR);
+      target_x.assertLessThan(gameLength, Errors.COORDINATE_OUT_OF_RANGE_ERROR);
+      target_y.assertLessThan(gameLength, Errors.COORDINATE_OUT_OF_RANGE_ERROR);
   }
 
 }
