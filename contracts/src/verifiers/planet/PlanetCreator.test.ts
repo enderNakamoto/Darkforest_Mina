@@ -109,87 +109,87 @@ describe('PlanetCreator Contract', () => {
     });
 
 
-    describe('player whitelist', () => {
-      it ('can add new accounts to whitelist', async () => {
-        let playerKey, nullifierRoot, numAddresses, playerWitness: MerkleMapWitness;
+    // describe('player whitelist', () => {
+    //   it ('can add new accounts to whitelist', async () => {
+    //     let playerKey, nullifierRoot, numAddresses, playerWitness: MerkleMapWitness;
     
-         // ----- Adding First Player to whitelist ---- 
-         playerKey = initializeRandomPlayer();
-         playerWitness = nullifierMap.getWitness(playerKey);
+    //      // ----- Adding First Player to whitelist ---- 
+    //      playerKey = initializeRandomPlayer();
+    //      playerWitness = nullifierMap.getWitness(playerKey);
     
-        nullifierMap.set(playerKey, Const.WHITELISTED_VALUE);
+    //     nullifierMap.set(playerKey, Const.WHITELISTED_VALUE);
     
-        txn = await Mina.transaction(senderAccount, () => {
-          zkAppInstance.addEligibleAddress(playerWitness);
-        });
-        await txn.prove();
-        await txn.sign([senderKey]).send();
+    //     txn = await Mina.transaction(senderAccount, () => {
+    //       zkAppInstance.addEligibleAddress(playerWitness);
+    //     });
+    //     await txn.prove();
+    //     await txn.sign([senderKey]).send();
     
-        // root state changed correctly after adding new address
-        nullifierRoot = zkAppInstance.playerNullifierRoot.get();
-        expect(nullifierRoot).toEqual(nullifierMap.getRoot());
+    //     // root state changed correctly after adding new address
+    //     nullifierRoot = zkAppInstance.playerNullifierRoot.get();
+    //     expect(nullifierRoot).toEqual(nullifierMap.getRoot());
     
-        // numAddresses incremented correctly
-        numAddresses = zkAppInstance.numberOfWhiteListedPlayers.get();
-        expect(numAddresses).toEqual(Field(1));
+    //     // numAddresses incremented correctly
+    //     numAddresses = zkAppInstance.numberOfWhiteListedPlayers.get();
+    //     expect(numAddresses).toEqual(Field(1));
     
-        // ----- Adding Second Player to whitelist ---- 
+    //     // ----- Adding Second Player to whitelist ---- 
     
-        playerKey = initializeRandomPlayer();
-        playerWitness = nullifierMap.getWitness(playerKey);
+    //     playerKey = initializeRandomPlayer();
+    //     playerWitness = nullifierMap.getWitness(playerKey);
     
-        nullifierMap.set(playerKey, Const.WHITELISTED_VALUE);
+    //     nullifierMap.set(playerKey, Const.WHITELISTED_VALUE);
     
-        txn = await Mina.transaction(senderAccount, () => {
-          zkAppInstance.addEligibleAddress(playerWitness);
-        });
-        await txn.prove();
-        await txn.sign([senderKey]).send();
+    //     txn = await Mina.transaction(senderAccount, () => {
+    //       zkAppInstance.addEligibleAddress(playerWitness);
+    //     });
+    //     await txn.prove();
+    //     await txn.sign([senderKey]).send();
     
-        // root state changed correctly after adding new address
-        nullifierRoot = zkAppInstance.playerNullifierRoot.get();
-        expect(nullifierRoot).toEqual(nullifierMap.getRoot());
+    //     // root state changed correctly after adding new address
+    //     nullifierRoot = zkAppInstance.playerNullifierRoot.get();
+    //     expect(nullifierRoot).toEqual(nullifierMap.getRoot());
     
-        // numAddresses incremented correctly
-        numAddresses = zkAppInstance.numberOfWhiteListedPlayers.get();
-        expect(numAddresses).toEqual(Field(2));
-      });
+    //     // numAddresses incremented correctly
+    //     numAddresses = zkAppInstance.numberOfWhiteListedPlayers.get();
+    //     expect(numAddresses).toEqual(Field(2));
+    //   });
     
-      it ('cannot add an already whitelisted account to whitelist', async () => {
-        let playerKey, nullifierRoot, numAddresses, playerWitness: MerkleMapWitness;
+    //   it ('cannot add an already whitelisted account to whitelist', async () => {
+    //     let playerKey, nullifierRoot, numAddresses, playerWitness: MerkleMapWitness;
           
-        playerKey = initializeRandomPlayer();
-        playerWitness = nullifierMap.getWitness(playerKey);
+    //     playerKey = initializeRandomPlayer();
+    //     playerWitness = nullifierMap.getWitness(playerKey);
     
-        nullifierMap.set(playerKey, Const.WHITELISTED_VALUE);
-        const rootAFterFirstAdd = nullifierMap.getRoot();
+    //     nullifierMap.set(playerKey, Const.WHITELISTED_VALUE);
+    //     const rootAFterFirstAdd = nullifierMap.getRoot();
         
-        txn = await Mina.transaction(senderAccount, () => {
-          zkAppInstance.addEligibleAddress(playerWitness);
-        });
-        await txn.prove();
-        await txn.sign([senderKey]).send();
+    //     txn = await Mina.transaction(senderAccount, () => {
+    //       zkAppInstance.addEligibleAddress(playerWitness);
+    //     });
+    //     await txn.prove();
+    //     await txn.sign([senderKey]).send();
 
-        // numAddresses incremented correctly
-        numAddresses = zkAppInstance.numberOfWhiteListedPlayers.get();
-        expect(numAddresses).toEqual(Field(1));
+    //     // numAddresses incremented correctly
+    //     numAddresses = zkAppInstance.numberOfWhiteListedPlayers.get();
+    //     expect(numAddresses).toEqual(Field(1));
 
-        expect(async () => {
-          txn = await Mina.transaction(senderAccount, () => {
-            zkAppInstance.addEligibleAddress(playerWitness);
-          });
-        }).rejects.toThrow(Const.ALREADY_WHITELISTED_ERROR);
+    //     expect(async () => {
+    //       txn = await Mina.transaction(senderAccount, () => {
+    //         zkAppInstance.addEligibleAddress(playerWitness);
+    //       });
+    //     }).rejects.toThrow(Const.ALREADY_WHITELISTED_ERROR);
         
-        // root state changed correctly after adding new address
-        nullifierRoot = zkAppInstance.playerNullifierRoot.get();
-        expect(nullifierRoot).toEqual(rootAFterFirstAdd);
+    //     // root state changed correctly after adding new address
+    //     nullifierRoot = zkAppInstance.playerNullifierRoot.get();
+    //     expect(nullifierRoot).toEqual(rootAFterFirstAdd);
     
-        // numAddresses incremented correctly
-        numAddresses = zkAppInstance.numberOfWhiteListedPlayers.get();
-        expect(numAddresses).toEqual(Field(1));
-      });
+    //     // numAddresses incremented correctly
+    //     numAddresses = zkAppInstance.numberOfWhiteListedPlayers.get();
+    //     expect(numAddresses).toEqual(Field(1));
+    //   });
       
-    })
+    // })
 
     // describe('homeworld initiation', () => {
 

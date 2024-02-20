@@ -1,6 +1,6 @@
 import { 
     Coordinate
-} from '../types/GlobalTypes'
+} from './globalTypes'
 
 import { 
     Field, 

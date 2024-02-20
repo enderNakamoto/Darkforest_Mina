@@ -24,7 +24,7 @@ import {
     });
   }
 
-  describe('OdometerVerifier', () => {
+  describe('DefenseVerifier', () => {
     let deployerKey: PrivateKey, 
     deployerAccount: PublicKey,
     senderKey: PrivateKey,

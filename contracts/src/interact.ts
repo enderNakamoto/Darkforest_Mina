@@ -13,7 +13,7 @@ import {
     getRandomHomePlanetCoordsSquare
 } from "./utils/planetInitiation.js";
 
-import { PlanetCreator } from './contracts/PlanetCreator/PlanetCreator.js';
+import { PlanetCreator } from './verifiers/planet/PlanetCreator.js';
 
 // ----------------------------------------------------
 // initiate a local blockchain, and an account to deploy the zkApp
