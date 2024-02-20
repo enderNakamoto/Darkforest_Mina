@@ -10,7 +10,7 @@ import {
     MerkleMapWitness
    } from 'o1js';
 
-import { Const } from './helpers/const';
+import { Const } from '../../utils/const';
 
 export class Planet extends Struct({
   id: Field,

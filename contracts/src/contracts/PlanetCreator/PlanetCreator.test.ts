@@ -11,7 +11,7 @@ import {
 } from 'o1js';
 
 import { PlanetCreator } from './PlanetCreator';
-import { Const } from './helpers/const';
+import { Const } from '../../utils/const';
 
 let proofsEnabled = false;
 
