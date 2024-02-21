@@ -10,17 +10,8 @@ import {
    } from 'o1js';
 
 import { Errors } from '../../utils/errors';
+import { Fleet } from '../../objects/Fleet';
 
-  export class Fleet extends Struct({
-    battleships: Field,
-    destroyers: Field,
-    carriers: Field
-  }){
-    strength(){
-      const fleetSTrength = this.battleships.add(this.destroyers).add(this.carriers);
-      return fleetSTrength;
-    };
-  }
 
   export class DefenseVerifier extends SmartContract {
 
