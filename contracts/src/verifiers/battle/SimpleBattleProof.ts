@@ -1,16 +1,17 @@
-import { Field, method, Provable, ZkProgram } from 'o1js';
+import { Field, Provable, ZkProgram } from 'o1js';
 import { Fleet } from '../../utils/globalTypes.js';
 import {Const} from '../../utils/const.js';
 
 const SimpleBattle= ZkProgram({
   name: "simple-battle-proof",
   publicInput: Fleet,
+  publicOutput: Field,
 
   methods: {
     calculate: {
-      privateInputs: [Fleet, Field],
+      privateInputs: [Fleet],
 
-      method(attackFleet: Fleet, defenseFleet: Fleet, winner: Field) {
+      method(attackFleet: Fleet, defenseFleet: Fleet) {
         const attackeBattleships = attackFleet.battleships.mul(Const.BATTLESHIP_COST);
         const attackeDestroyers = attackFleet.destroyers.mul(Const.DESTROYER_COST);
         const attackeCarriers = attackFleet.carriers.mul(Const.CARRIER_COST);
@@ -38,8 +39,7 @@ const SimpleBattle= ZkProgram({
             Field(0)
           );
 
-          winner.assertEquals(calculatedWinner);
-
+          return calculatedWinner;    
       },
     }
   }

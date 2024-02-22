@@ -8,6 +8,7 @@ export interface Coordinate{
 
 // structs     
 export class Fleet extends Struct({
+   playerId: Field, 
    battleships: Field,
    destroyers: Field,
    carriers: Field

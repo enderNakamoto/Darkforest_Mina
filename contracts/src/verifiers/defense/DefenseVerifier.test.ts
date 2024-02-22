@@ -20,8 +20,9 @@ import {
   let proofsEnabled = false;
 
 
-  function createFLeet(battleships: Field, destroyers: Field, carriers: Field){
+  function createFLeet(playerId: Field, battleships: Field, destroyers: Field, carriers: Field){
     return new Fleet({
+      playerId,
       battleships,
       destroyers,
       carriers
@@ -91,7 +92,7 @@ import {
       let planetId = Field(1);
       let planetKeyWitness = defenseMap.getWitness(planetId);
 
-      let inValidDefenseFleet = createFLeet(Field(500), Field(300), Field(300));
+      let inValidDefenseFleet = createFLeet(Field(1), Field(500), Field(300), Field(300));
 
       expect(async () => {
         let txn = await Mina.transaction(senderAccount, () => {
@@ -105,7 +106,7 @@ import {
       let planetId = Field(1);
       let planetKeyWitness = defenseMap.getWitness(planetId);
 
-      let validDefenseFleet = createFLeet(Field(500), Field(300), Field(200));
+      let validDefenseFleet = createFLeet(Field(2),Field(500), Field(300), Field(200));
       const validDefenseHash = Poseidon.hash(Fleet.toFields(validDefenseFleet));
       defenseMap.set(planetId, validDefenseHash);
 
