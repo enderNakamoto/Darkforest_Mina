@@ -1,16 +1,16 @@
-import { Field, method, ZkProgram } from 'o1js';
+import { Field, method, Provable, ZkProgram } from 'o1js';
 import { Fleet } from '../../utils/globalTypes.js';
 import {Const} from '../../utils/const.js';
 
-const SimpleBattleProof = ZkProgram({
+const SimpleBattle= ZkProgram({
   name: "simple-battle-proof",
   publicInput: Fleet,
 
   methods: {
     calculate: {
-      privateInputs: [Fleet],
+      privateInputs: [Fleet, Field],
 
-      method(attackFleet: Fleet, defenseFleet: Fleet) {
+      method(attackFleet: Fleet, defenseFleet: Fleet, winner: Field) {
         const attackeBattleships = attackFleet.battleships.mul(Const.BATTLESHIP_COST);
         const attackeDestroyers = attackFleet.destroyers.mul(Const.DESTROYER_COST);
         const attackeCarriers = attackFleet.carriers.mul(Const.CARRIER_COST);
@@ -28,10 +28,22 @@ const SimpleBattleProof = ZkProgram({
           // carriers > battleships
           const carriersBeatsBattleships = attackeCarriers.sub(defenderBattleships);
 
-          const result = battleshipsBeatsDestroyers.add(destroyersBeatsCarriers).add(carriersBeatsBattleships);
+          const battleResult = battleshipsBeatsDestroyers.add(destroyersBeatsCarriers).add(carriersBeatsBattleships);
 
-          return result;
+          const calculatedWinner = Provable.if(
+            battleResult.greaterThanOrEqual(
+              Field(0)
+            ),
+            Field(1),
+            Field(0)
+          );
+
+          winner.assertEquals(calculatedWinner);
+
       },
     }
   }
 });
+
+export let BattleProof_ = ZkProgram.Proof(SimpleBattle);
+export class BattleProof extends BattleProof_ {}
