@@ -36,12 +36,23 @@ import { BattleProof } from './SimpleBattleProof';
     // update the defense of a planet
     @method verifyWinner(
         battleProof: BattleProof,
+        battleKeyWitness: MerkleMapWitness
     ){
         // STEP 1 : verify the battle proof
+        battleProof.verify();
 
         // STEP 2 : Set the winner 
+        const winner = battleProof.publicOutput;
+        const [battleMapRoot, _] = battleKeyWitness.computeRootAndKey(winner);
+        this.battleHistoryMapRoot.set(battleMapRoot);
+        
 
         // STEP 3 : Increment the number of battles
+        const currentBattles = this.numberOfBattles.getAndRequireEquals();
+        this.numberOfBattles.set(currentBattles.add(Field(1)));
+
+        // STEP 4 : emit the event
+        this.emitEvent("battle winner", winner);
 
     }
 
