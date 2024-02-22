@@ -10,7 +10,7 @@ import {
    } from 'o1js';
 
 import { Errors } from '../../utils/errors';
-import { Fleet } from '../../objects/Fleet';
+import { Fleet } from '../../utils/globalTypes';
 
 
   export class DefenseVerifier extends SmartContract {

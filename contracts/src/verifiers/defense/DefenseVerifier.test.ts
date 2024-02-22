@@ -11,7 +11,7 @@ import {
     MerkleMap
   } from 'o1js';
 
-  import { Fleet } from '../../objects/Fleet';
+  import { Fleet } from '../../utils/globalTypes';
   import { DefenseVerifier } from './DefenseVerifier';
   import  { Errors } from '../../utils/errors';
   import { Const } from '../../utils/const';
