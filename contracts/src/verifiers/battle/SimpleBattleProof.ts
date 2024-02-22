@@ -35,8 +35,8 @@ const SimpleBattle= ZkProgram({
             battleResult.greaterThanOrEqual(
               Field(0)
             ),
-            Field(1),
-            Field(0)
+            defenseFleet.playerId,
+            attackFleet.playerId
           );
 
           return calculatedWinner;    
