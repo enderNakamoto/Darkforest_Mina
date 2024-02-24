@@ -1,7 +1,11 @@
-# Game Overview
+![alt text](image.png)
+
+# Dark Armada: Masters of  the Void
 
 ## Introduction 
-Dark Forest is a MMO (massively multiplayer online) game using Zero Knowledge Proofs to simulate verifiable fog of war .
+Dark Armada is a MMO (massively multiplayer online) game using Zero Knowledge proofs(ZKPs) to simulate verifiable fog of war. 
+
+Imagine an expansive galaxy teeming with myriad planets, each fortified and primed for cosmic conflict. As a player, you are thrust into this universe by assuming command of one of these planets, becoming its ruler and guardian. Upon embarking on this interstellar journey, players seize control of planets and covertly organize defensive fleets, concealed from adversaries through the use of zero-knowledge proofs (zk-SNARKs)
 
 ## Game Objects
 The most important aspect of the dark forest universe is `Planet`

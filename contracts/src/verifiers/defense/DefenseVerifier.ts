@@ -3,8 +3,7 @@ import {
     SmartContract, 
     state, 
     State, 
-    method, 
-    Struct, 
+    method,
     Poseidon,
     MerkleMapWitness
    } from 'o1js';

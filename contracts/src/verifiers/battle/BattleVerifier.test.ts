@@ -9,7 +9,7 @@ import {
   } from 'o1js';
 
   import { Fleet } from '../../utils/globalTypes';
-  import { DefenseVerifier } from './DefenseVerifier';
+  import { BattleVerifier } from './BattleVerifier';
   import  { Errors } from '../../utils/errors';
 
 
@@ -25,18 +25,18 @@ import {
     });
   }
 
-  describe('DefenseVerifier', () => {
+  describe('BattleVerifier', () => {
     let deployerKey: PrivateKey, 
     deployerAccount: PublicKey,
     senderKey: PrivateKey,
     senderAccount: PublicKey,
     zkAppPrivateKey: PrivateKey,
     zkAppAddress: PublicKey,
-    zkApp: DefenseVerifier,
-    defenseMap: MerkleMap;
+    zkApp: BattleVerifier,
+    battleMerkleMap: MerkleMap;
 
     beforeAll(async () => {
-      if (proofsEnabled) await DefenseVerifier.compile();
+      if (proofsEnabled) await BattleVerifier.compile();
     });
 
     beforeEach(async () => {
@@ -49,13 +49,13 @@ import {
       ({ privateKey: deployerKey, publicKey: deployerAccount } =Local.testAccounts[0]);
       ({ privateKey: senderKey, publicKey: senderAccount } = Local.testAccounts[1]);
 
-      // create a new DefenseVerifier instance
+      // create a new BattleVerifier instance
       zkAppPrivateKey = PrivateKey.random();
       zkAppAddress = zkAppPrivateKey.toPublicKey();
-      zkApp = new DefenseVerifier(zkAppAddress);
+      zkApp = new BattleVerifier(zkAppAddress);
 
       // initialize the defense map
-      defenseMap = new MerkleMap();
+      battleMerkleMap = new MerkleMap();
 
       // deploy defense verifier
       await localDeployandInitate();
@@ -66,7 +66,7 @@ import {
       const txn = await Mina.transaction(deployerAccount, () => {
         AccountUpdate.fundNewAccount(deployerAccount);
         zkApp.deploy();
-        zkApp.initDefenses(defenseMap.getRoot());
+        zkApp.initBattleHistory(battleMerkleMap.getRoot());
       });
       await txn.prove();
 
@@ -76,48 +76,24 @@ import {
 
     it('deploy and initialize the defense verifier', async () => {
 
-      const planetsWIthDefense = zkApp.numDefenses.get();
+      const planetsWIthDefense = zkApp.numberOfBattles.get();
       expect(planetsWIthDefense).toEqual(Field(0));
 
-      const defenseRoot = zkApp.defenseRoot.get();
-      expect(defenseRoot).toEqual(defenseMap.getRoot());
+      const battleMapRoot = zkApp.battleHistoryMapRoot.get();
+      expect(battleMapRoot).toEqual(battleMerkleMap.getRoot());
     });
 
-    it('cannot add defense if fleet strength is over 1000', async() => {
+    it('calculates right attacker', async() => {
 
-      let planetId = Field(1);
-      let planetKeyWitness = defenseMap.getWitness(planetId);
+        const attackerId = Field(1);
+        const defenderId = Field(2);
 
-      let inValidDefenseFleet = createFLeet(Field(1), Field(500), Field(300), Field(300));
+        const attacker = createFLeet(attackerId, Field(10), Field(20), Field(30));
+        const defender = createFLeet(defenderId, Field(5), Field(10), Field(15));
+    
+        const winner = zkApp.calculateWinner(attacker, defender);
+        expect(winner).toEqual(Field(1));
 
-      expect(async () => {
-        let txn = await Mina.transaction(senderAccount, () => {
-          zkApp.updateDefense(planetId, inValidDefenseFleet, planetKeyWitness);
-        });
-      }).rejects.toThrow(Errors.DEFENSE_STRENGTH_ERROR);
-    });
-
-    it('can add defense if fleet strength is less than 1000', async() => {
-
-      let planetId = Field(1);
-      let planetKeyWitness = defenseMap.getWitness(planetId);
-
-      let validDefenseFleet = createFLeet(Field(2),Field(500), Field(300), Field(200));
-      const validDefenseHash = Poseidon.hash(Fleet.toFields(validDefenseFleet));
-      defenseMap.set(planetId, validDefenseHash);
-
-      let txn = await Mina.transaction(senderAccount, () => {
-        zkApp.updateDefense(planetId, validDefenseFleet, planetKeyWitness);
-      });
-      await txn.prove();
-      await txn.sign([senderKey]).send();
-
-      const defenseRoot = zkApp.defenseRoot.get();
-      expect(defenseRoot).toEqual(defenseMap.getRoot());
-
-      const numberOfSetDefenses = zkApp.numDefenses.get();
-      expect(numberOfSetDefenses).toEqual(Field(1));
     });
 
   });
-
