@@ -43,8 +43,6 @@ function calculateWinner(attackFleet: Fleet, defenseFleet: Fleet): Field{
     return calculatedWinner
 }  
 
-
-
 export class BattleVerifier extends SmartContract {
 
   // public state stored in Mina blockchain
@@ -67,7 +65,7 @@ export class BattleVerifier extends SmartContract {
   }
 
   // update the defense of a planet
-  @method calculateWinner(
+  @method computeBattle(
       attackFleet: Fleet,
       defenseFleet: Fleet,
       battleKeyWitness: MerkleMapWitness
@@ -80,7 +78,6 @@ export class BattleVerifier extends SmartContract {
       const [battleMapRoot, _] = battleKeyWitness.computeRootAndKey(winner);
       this.battleHistoryMapRoot.set(battleMapRoot);
       
-
       // STEP 3 : Increment the number of battles
       const currentBattles = this.numberOfBattles.getAndRequireEquals();
       this.numberOfBattles.set(currentBattles.add(Field(1)));

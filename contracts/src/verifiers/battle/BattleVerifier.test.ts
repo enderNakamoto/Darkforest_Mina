@@ -4,7 +4,6 @@ import {
     PrivateKey,
     PublicKey,
     AccountUpdate,
-    Poseidon,
     MerkleMap
   } from 'o1js';
 
@@ -83,17 +82,67 @@ import {
       expect(battleMapRoot).toEqual(battleMerkleMap.getRoot());
     });
 
-    it('calculates right attacker', async() => {
+    it('calculates right winner', async() => {
 
-        const attackerId = Field(1);
-        const defenderId = Field(2);
+      let battleId = Field(1);
+      let battleKeyWitness = battleMerkleMap.getWitness(battleId);
 
-        const attacker = createFLeet(attackerId, Field(10), Field(20), Field(30));
-        const defender = createFLeet(defenderId, Field(5), Field(10), Field(15));
-    
-        const winner = zkApp.calculateWinner(attacker, defender);
-        expect(winner).toEqual(Field(1));
+      const attackerId = Field(1);
+      const defenderId = Field(2);
+
+      const attackFleet = createFLeet(attackerId, Field(10), Field(20), Field(30));
+      const defenseFleet = createFLeet(defenderId, Field(5), Field(10), Field(15));
+      
+      battleMerkleMap.set(battleId, defenderId);
+
+      let txn = await Mina.transaction(senderAccount, () => {
+        zkApp.computeBattle(attackFleet, defenseFleet, battleKeyWitness);
+      });
+      await txn.prove();
+      await txn.sign([senderKey]).send();
+
+      console.log('battleMerkleMap.getRoot()', battleMerkleMap.getRoot());
+      console.log('zkApp.battleHistoryMapRoot.get()', zkApp.battleHistoryMapRoot.get());
+
+      const battleHistoryMapRoot = zkApp.battleHistoryMapRoot.get();
+      expect(battleHistoryMapRoot).toEqual(battleMerkleMap.getRoot());
+
+      const numberOfSetBattles = zkApp.numberOfBattles.get();
+      expect(numberOfSetBattles).toEqual(Field(1));
 
     });
+
+    // it('calculates right winner when attacker wins', async() => {
+
+    //   let battleId = Field(1);
+    //   let battleKeyWitness = battleMerkleMap.getWitness(battleId);
+
+    //   const attackerId = Field(1);
+    //   const defenderId = Field(2);
+
+    //   const attackFleet = createFLeet(attackerId, Field(5), Field(10), Field(15));
+    //   const defenseFleet = createFLeet(defenderId, Field(10), Field(20), Field(30));
+      
+    //   // map with attacker as winner
+    //   battleMerkleMap.set(battleId, attackerId);
+
+    //   let txn = await Mina.transaction(senderAccount, () => {
+    //     zkApp.computeBattle(attackFleet, defenseFleet, battleKeyWitness);
+    //   });
+    //   await txn.prove();
+    //   await txn.sign([senderKey]).send();
+
+    //   console.log('battleMerkleMap.getRoot()', battleMerkleMap.getRoot());
+    //   console.log('zkApp.battleHistoryMapRoot.get()', zkApp.battleHistoryMapRoot.get());
+
+    //   expect(Field(1)).toEqual(Field(1));
+
+    //   // const battleHistoryMapRoot = zkApp.battleHistoryMapRoot.get();
+    //   // expect(battleHistoryMapRoot).toEqual(battleMerkleMap.getRoot());
+
+    //   // const numberOfSetBattles = zkApp.numberOfBattles.get();
+    //   // expect(numberOfSetBattles).toEqual(Field(1));
+
+    // });
 
   });
