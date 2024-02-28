@@ -1,11 +1,6 @@
-import {
-    Field,
-  } from 'o1js';
-
-
 export namespace Errors {
     // Defense Verifier Errors
-    export const DEFENSE_STRENGTH_ERROR = 'defense strength must be less than 1000';
+    export const FLEET_STRENGTH_ERROR = 'fleet strength must be less than max fleet strength';
 
     // Planet Creation Verifier Errors
     export const ALREADY_WHITELISTED_ERROR = 'player already in whitelist';

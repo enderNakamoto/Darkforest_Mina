@@ -94,7 +94,7 @@ import {
         let txn = await Mina.transaction(senderAccount, () => {
           zkApp.updateDefense(planetId, inValidDefenseFleet, planetKeyWitness);
         });
-      }).rejects.toThrow(Errors.DEFENSE_STRENGTH_ERROR);
+      }).rejects.toThrow(Errors.FLEET_STRENGTH_ERROR);
     });
 
     it('can add defense if fleet strength is less than 1000', async() => {

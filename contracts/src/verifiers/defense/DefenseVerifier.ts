@@ -10,6 +10,7 @@ import {
 
 import { Errors } from '../../utils/errors';
 import { Fleet } from '../../utils/globalTypes';
+import { verifyFleetStrength } from '../../utils/gameLogic';
 
 
   export class DefenseVerifier extends SmartContract {
@@ -41,8 +42,7 @@ import { Fleet } from '../../utils/globalTypes';
     ){
 
       // STEP 1: make sure that the defense set is valid
-      const fleetStrength = defense.strength();
-      fleetStrength.assertLessThanOrEqual(1000, Errors.DEFENSE_STRENGTH_ERROR);
+      verifyFleetStrength(defense);
 
       // STEP 2: update the defense
       const defenseHash = Poseidon.hash(Fleet.toFields(defense));

@@ -35,10 +35,12 @@ export namespace Const {
     export const WHITELISTED_VALUE = Field(1);
     export const HOMEWORLD_SET_VALUE = Field(2);
 
+
     // fleet values
     export const BATTLESHIP_COST = Field(4);
     export const DESTROYER_COST = Field(2);
     export const CARRIER_COST = Field(6);
+    export const MAX_FLEET_STRENGTH = Field(1000);
 }
 
 

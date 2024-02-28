@@ -43,6 +43,12 @@ function calculateWinner(attackFleet: Fleet, defenseFleet: Fleet): Field{
     return calculatedWinner
 }  
 
+// function attackFleetVerifier(fleet: Fleet){
+//   const fleetStrength = fleet.strength();
+//   fleetStrength.assertLessThanOrEqual(Const.MAX_ARMY_STRENGTH, Errors.ARMY_STRENGTH_ERROR);
+// }
+
+
 export class BattleVerifier extends SmartContract {
 
   // public state stored in Mina blockchain
