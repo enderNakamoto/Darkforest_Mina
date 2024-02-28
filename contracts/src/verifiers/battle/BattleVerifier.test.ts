@@ -112,37 +112,19 @@ import {
 
     });
 
-    // it('calculates right winner when attacker wins', async() => {
+    it('cannot attack if fleet strength is over max strength', async() => {
 
-    //   let battleId = Field(1);
-    //   let battleKeyWitness = battleMerkleMap.getWitness(battleId);
+      let battleId = Field(1);
+      let battleKeyWitness = battleMerkleMap.getWitness(battleId);
 
-    //   const attackerId = Field(1);
-    //   const defenderId = Field(2);
+      let inValidAttackFleet = createFLeet(Field(1), Field(500), Field(300), Field(300));
+      let validDefenseFleet = createFLeet(Field(2), Field(5), Field(3), Field(10));
 
-    //   const attackFleet = createFLeet(attackerId, Field(5), Field(10), Field(15));
-    //   const defenseFleet = createFLeet(defenderId, Field(10), Field(20), Field(30));
-      
-    //   // map with attacker as winner
-    //   battleMerkleMap.set(battleId, attackerId);
-
-    //   let txn = await Mina.transaction(senderAccount, () => {
-    //     zkApp.computeBattle(attackFleet, defenseFleet, battleKeyWitness);
-    //   });
-    //   await txn.prove();
-    //   await txn.sign([senderKey]).send();
-
-    //   console.log('battleMerkleMap.getRoot()', battleMerkleMap.getRoot());
-    //   console.log('zkApp.battleHistoryMapRoot.get()', zkApp.battleHistoryMapRoot.get());
-
-    //   expect(Field(1)).toEqual(Field(1));
-
-    //   // const battleHistoryMapRoot = zkApp.battleHistoryMapRoot.get();
-    //   // expect(battleHistoryMapRoot).toEqual(battleMerkleMap.getRoot());
-
-    //   // const numberOfSetBattles = zkApp.numberOfBattles.get();
-    //   // expect(numberOfSetBattles).toEqual(Field(1));
-
-    // });
+      expect(async () => {
+        let txn = await Mina.transaction(senderAccount, () => {
+          zkApp.computeBattle(inValidAttackFleet, validDefenseFleet, battleKeyWitness);
+        });
+      }).rejects.toThrow(Errors.FLEET_STRENGTH_ERROR);
+    });
 
   });
