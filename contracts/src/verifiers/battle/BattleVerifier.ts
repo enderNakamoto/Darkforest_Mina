@@ -11,6 +11,7 @@ import {
 import { Errors } from '../../utils/errors';
 import { Const } from '../../utils/const';
 import { Fleet } from '../../utils/globalTypes';
+import { verifyFleetStrength } from '../../utils/gameLogic';
 
 function calculateWinner(attackFleet: Fleet, defenseFleet: Fleet): Field{
   const attackeBattleships = attackFleet.battleships.mul(Const.BATTLESHIP_COST);
@@ -43,12 +44,6 @@ function calculateWinner(attackFleet: Fleet, defenseFleet: Fleet): Field{
     return calculatedWinner
 }  
 
-// function attackFleetVerifier(fleet: Fleet){
-//   const fleetStrength = fleet.strength();
-//   fleetStrength.assertLessThanOrEqual(Const.MAX_ARMY_STRENGTH, Errors.ARMY_STRENGTH_ERROR);
-// }
-
-
 export class BattleVerifier extends SmartContract {
 
   // public state stored in Mina blockchain
@@ -77,6 +72,9 @@ export class BattleVerifier extends SmartContract {
       battleKeyWitness: MerkleMapWitness
   )
   {
+      // STEP 0: make sure that the attacking army is valid
+      verifyFleetStrength(attackFleet);
+    
       // STEP 1 :calculate the winner
       const winner = calculateWinner(attackFleet, defenseFleet);
       
