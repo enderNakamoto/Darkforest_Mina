@@ -57,5 +57,7 @@ import { verifyFleetStrength } from '../../utils/gameLogic';
       this.emitEvent("defense updated", planetId);
     }
 
+    
+
 
   }
