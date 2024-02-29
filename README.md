@@ -5,7 +5,7 @@
 ## Introduction 
 Dark Armada is a MMO (massively multiplayer online) game using Zero Knowledge proofs(ZKPs) to simulate verifiable fog of war. 
 
-Imagine an expansive galaxy teeming with myriad planets, each fortified and primed for cosmic conflict. As a player, you are thrust into this universe by assuming command of one of these planets, becoming its ruler and guardian. Upon embarking on this interstellar journey, players seize control of planets and covertly organize defensive fleets, concealed from adversaries through the use of zero-knowledge proofs (zk-SNARKs)
+Imagine an expansive galaxy teeming with myriad planets, each fortified and primed for cosmic conflict. As a player, you are thrust into this universe by assuming command of one of these planets, becoming its ruler and guardian. Upon embarking on this interstellar journey, players take control of planets and covertly organize defensive fleets, concealed from adversaries through the use of zero-knowledge proofs (zk-SNARKs). The attacks on these planets are however, public. 
 
 ## Game Objects
 The most important aspect of the dark forest universe is `Planet`
