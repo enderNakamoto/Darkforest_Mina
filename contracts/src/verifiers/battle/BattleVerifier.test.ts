@@ -32,7 +32,8 @@ import {
     zkAppPrivateKey: PrivateKey,
     zkAppAddress: PublicKey,
     zkApp: BattleVerifier,
-    battleMerkleMap: MerkleMap;
+    battleMerkleMap: MerkleMap,
+    planetStateMap: MerkleMap;
 
     beforeAll(async () => {
       if (proofsEnabled) await BattleVerifier.compile();
@@ -55,6 +56,7 @@ import {
 
       // initialize the defense map
       battleMerkleMap = new MerkleMap();
+      planetStateMap = new MerkleMap();
 
       // deploy defense verifier
       await localDeployandInitate();
@@ -65,7 +67,7 @@ import {
       const txn = await Mina.transaction(deployerAccount, () => {
         AccountUpdate.fundNewAccount(deployerAccount);
         zkApp.deploy();
-        zkApp.initBattleHistory(battleMerkleMap.getRoot());
+        zkApp.initBattleHistory(battleMerkleMap.getRoot(), planetStateMap.getRoot());
       });
       await txn.prove();
 
@@ -80,6 +82,9 @@ import {
 
       const battleMapRoot = zkApp.battleHistoryMapRoot.get();
       expect(battleMapRoot).toEqual(battleMerkleMap.getRoot());
+
+      const planetStateMapRoot = zkApp.PlanetStateMapRoot.get();
+      expect(planetStateMapRoot).toEqual(planetStateMap.getRoot());
     });
 
     it('calculates right winner', async() => {
