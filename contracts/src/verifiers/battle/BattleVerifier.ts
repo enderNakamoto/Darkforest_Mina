@@ -5,12 +5,13 @@ import {
     State, 
     method, 
     Provable,
+    Poseidon,
     MerkleMapWitness
    } from 'o1js';
 
 import { Errors } from '../../utils/errors';
 import { Const } from '../../utils/const';
-import { Fleet } from '../../utils/globalTypes';
+import { Fleet, Planet } from '../../utils/globalTypes';
 import { verifyFleetStrength } from '../../utils/gameLogic';
 
 function calculateWinner(attackFleet: Fleet, defenseFleet: Fleet): Field{
@@ -49,10 +50,12 @@ export class BattleVerifier extends SmartContract {
   // public state stored in Mina blockchain
   @state(Field) numberOfBattles = State<Field>();
   @state(Field) battleHistoryMapRoot = State<Field>();
+  @state(Field) PlanetStateMapRoot = State<Field>();
 
   // events emitted by the smart contract  
   events = {
     "battle winner": Field,
+    "planet attacked": Field,
   }
 
   // initialize the smart contract
@@ -61,8 +64,29 @@ export class BattleVerifier extends SmartContract {
       this.numberOfBattles.set(Field(0));
   }
 
-  initBattleHistory(_initialBattleHistoryMapRoot: Field){
+  initBattleHistory(_initialBattleHistoryMapRoot: Field, 
+    _initialPlanetStateMapRoot: Field){
       this.battleHistoryMapRoot.set(_initialBattleHistoryMapRoot);
+      this.PlanetStateMapRoot.set(_initialBattleHistoryMapRoot);
+  }
+
+
+  @method attackPlanet(
+    attackingFleet: Fleet,
+    target: Planet,
+    planetKeyWitness: MerkleMapWitness
+  ){
+    // STEP 0: make sure that the attacking army is valid
+    verifyFleetStrength(attackingFleet);
+
+    // STEP 2 : set the attacking fleet
+    target.attackingFleet = attackingFleet;
+
+     // STEP 2: update the defense
+     const planetHash = Poseidon.hash(Planet.toFields(target));
+     const [planetMapRoot, _] = planetKeyWitness.computeRootAndKey(planetHash);
+     this.PlanetStateMapRoot.set(planetMapRoot);
+
   }
 
   // update the defense of a planet
@@ -89,4 +113,5 @@ export class BattleVerifier extends SmartContract {
       // STEP 4 : emit the event
       this.emitEvent("battle winner", winner);
   }
+
 }

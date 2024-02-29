@@ -18,3 +18,9 @@ export class Fleet extends Struct({
      return fleetSTrength;
    };
  };
+
+ export class Planet extends Struct({
+    owner: Field,
+    defense: Fleet,
+    attackingFleet: Fleet,
+ }){}
