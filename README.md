@@ -64,7 +64,7 @@ If the defender (Player 1) anticipates that an incoming attack will likely lead 
 
 ![alt text](images/step4_battle.png)
 
-## Zero-knowledge Proof Application
+## ZKPs in the game:
 
 Dark Armada uses ZKP to prove 3 operations regarding planet location and fleet engagements: 
 
@@ -74,61 +74,119 @@ Dark Armada uses ZKP to prove 3 operations regarding planet location and fleet e
 
 ### Planet Initiation 
 
-### Planet Defense Initialization
+While initiating a planet we submit a proof three things: 
 
-### Fleet Movement
+1. The max number of planets not reached
+2. Player is in the whitelist 
+3. Initiated Planet co-ordinates are within the game universe.
+
+```typescript
+   // STEP 1: check if the number of planets reached MAX_NUM_PLANETS
+    let planetsNumBefore = this.numberOfPlanets.getAndRequireEquals();
+    planetsNumBefore.assertLessThan(Const.MAX_NUM_PLANETS, Errors.MAX_NUM_PLANETS_ERROR);
+
+    // STEP 2: check if the player is in the whitelist, and has not initiated a homeworld
+    const currentPlayer = Poseidon.hash(this.sender.toFields());
+    let nullRootBefore = this.playerNullifierRoot.getAndRequireEquals();
+
+    [ derivedNullRoot, derivedNullKey ] = nullifierKeyWitness.computeRootAndKey(Const.WHITELISTED_VALUE);
+    derivedNullRoot.assertEquals(nullRootBefore, Errors.PLAYER_CANNOT_INITIATE_ERROR);
+    derivedNullKey.assertEquals(currentPlayer, Errors.PLAYER_CANNOT_INITIATE_ERROR);
+    
+
+    // STEP 3: check if the coordinate is within the game radius
+    const gameLength = this.gameLength.getAndRequireEquals();
+
+    x.assertLessThan(gameLength, Errors.COORDINATE_OUT_OF_RANGE_ERROR);
+    y.assertLessThan(gameLength, Errors.COORDINATE_OUT_OF_RANGE_ERROR);
+```
+
+### Fleet Initialization
+
+While initiating a planetary defense, or assembling an atatck fleet to attack other planets
+We check that the fllet strength does not exceed the max limit set in the game
+
+```typescript
+export function verifyFleetStrength(fleet: Fleet){
+    const fleetStrength = fleet.strength();
+    fleetStrength.assertLessThanOrEqual(Const.MAX_FLEET_STRENGTH, Errors.FLEET_STRENGTH_ERROR);
+}
+```
 
 ### Battle computation 
 
-
-
-
-
-## Game Objects
-The most important aspect of the dark forest universe is `Planet`
+Last, but not the least - we compute fleet battles on client computer of the defender and submit the proof to be validated. 
 
 ```typescript
-export class Planet extends Struct({
-  id: Field,
-  population: Field,
-  position: CircuitString,
-  populationCap: Field,
-  populationGrowth: Field,
-  ore: Field,
-  oreCap: Field,
-  oreGrowth: Field,
-}){ }
+  @method computeBattle(
+      attackFleet: Fleet,
+      defenseFleet: Fleet,
+      battleKeyWitness: MerkleMapWitness
+  )
+  {
+      // STEP 0: make sure that the attacking army is valid
+      verifyFleetStrength(attackFleet);
+    
+      // STEP 1 :calculate the winner
+      const winner = calculateWinner(attackFleet, defenseFleet);
+      
+      // STEP 2 : Set the winner 
+      const [battleMapRoot, _] = battleKeyWitness.computeRootAndKey(winner);
+      this.battleHistoryMapRoot.set(battleMapRoot);
+      
+      // STEP 3 : Increment the number of battles
+      const currentBattles = this.numberOfBattles.getAndRequireEquals();
+      this.numberOfBattles.set(currentBattles.add(Field(1)));
+
+      // STEP 4 : emit the event
+      this.emitEvent("battle winner", winner);
+  }
 ```
 
-The Planet has two resources - population and ore (more can be added later), both of which grows gradually, and has a cap. 
+Now let's explain the `calculateWinner() function`.In the game POC, as of now the fleets consist of 3 units - Battleships, Destroyers and Carriers
 
-The Planet's position that is kept secret. Players can only observe (detect) the limited universe around them as they move around (enumerate) through the coordinates. They can detect other planets with hash collisions 
+
+In the Rock-Paper-Scissor esque fashion, some units perform better (has an advantage over other units)
+1. Battleship: Powerful and heavily armored, capable of enduring a lot of damage. Its strength lies in its ability to overpower Destroyers with its superior firepower.
+2. Destroyer: Equipped with fast, agile, and specialized in anti-aircraft and missile defense systems. It can effectively protect against and neutralize Carriers by intercepting their aircraft and missiles.
+3. Carrier: Launches aircraft and drones, providing a significant advantage over Battleships by attacking from a distance and avoiding direct firepower.
+
+For now, We simply find winners of Battleship-Destroyer, Destroyer-Carrier and Carrier-Battleship engagements, and the player who won 2 out of 3 engagements in vrowned the winner.
+This is subject to more change as the game evolves.
 
 ```typescript
-export class Position extends Struct({
-  x: Field,
-  y: Field,
-  panetId: Field
-}){ }
+function calculateWinner(attackFleet: Fleet, defenseFleet: Fleet): Field{
+  const attackeBattleships = attackFleet.battleships.mul(Const.BATTLESHIP_COST);
+  const attackeDestroyers = attackFleet.destroyers.mul(Const.DESTROYER_COST);
+  const attackeCarriers = attackFleet.carriers.mul(Const.CARRIER_COST);
 
+  const defenderBattleships = defenseFleet.battleships.mul(Const.BATTLESHIP_COST);
+  const defenderDestroyers = defenseFleet.destroyers.mul(Const.DESTROYER_COST);
+  const defenderCarriers = defenseFleet.carriers.mul(Const.CARRIER_COST);
+
+    //  battleships > destroyers
+    const battleshipsBeatsDestroyers = attackeBattleships.sub(defenderDestroyers);
+
+    // destroyers > carriers
+    const destroyersBeatsCarriers = attackeDestroyers.sub(defenderCarriers);
+
+    // carriers > battleships
+    const carriersBeatsBattleships = attackeCarriers.sub(defenderBattleships);
+
+    const battleResult = battleshipsBeatsDestroyers.add(destroyersBeatsCarriers).add(carriersBeatsBattleships);
+
+    const calculatedWinner = Provable.if(
+      battleResult.greaterThanOrEqual(
+        Field(0)
+      ),
+      defenseFleet.playerId,
+      attackFleet.playerId
+    );
+
+    return calculatedWinner
+} 
 ```
 
-Players can also move their Fleet, and move population or Ore with it. It is represented by the Struct as follows
-
-```typescript
-export class Movement extends Struct({
-  id: Field,
-  initiator: PublicKey,
-  fromPlanet: Field,
-  toPlanet: Field,
-  popArriving: Field,
-  oreMoved: Field,
-  departureTime: Field,
-  arrivalTime: Field
-}){ }
-```
-
-If the population landed via fleet exceeds current population of the planet, player can take over the planet. If the planet already belonged to a player, then the population gets added. 
 
 ## Spawning Solar systems/Planets
 Creating a universe that balances realism with engaging gameplay presents a unique challenge. 
@@ -144,14 +202,6 @@ We use Poseidon hash functions to generate planet coordinates, adjusting their r
 Increasing zeros further drastically reduced the number of planets.
 
 **Realistic Comparison**: In reality, only about 14 known stars exist within a 10 light-year radius of our Sun. This sparsity contrasts with the game's initial setting, where around 190 stars are placed within a 100 light-year radius, with a difficulty of three leading zeros.
-
-
-## References 
-
-* [Simple Game Explanation](https://trapdoortech.medium.com/dark-forest-one-interesting-game-with-zk-snark-technology-47528fa7691e)
-* [ZK Global Game Overview](https://www.youtube.com/watch?v=nwUCccUS75k)
-* [Original DF git repo](https://github.com/darkforest-eth)
-
 
 ## Mining Planets (Benchmarking)
 
@@ -188,23 +238,9 @@ e.g. hashing 100,000 times -  100 co-ordinates mwill take more than 4 minutes.
 
 Given a big enough universe, it would be quite hard for anyone to bruteforce all the co-ordinates.
 
-## Game Notes
+## References 
 
-### TODO for Planet initialization
-
-1. Need to come up with a realistic initial radius 
-2. figure how to space the planets apart 
-3. How to randomly initiate planets 
-4. Mina has access to VRF?
-5. Mina has no mapping, so save planets in Merkle Tree(nullifier perhaps?)
-7. A way to increase radius based on planets 
-9. to counter Sybil, requitre Mina to initiate a planet
-10. DarkForest uses MIMC hash, can we use Poseidon instead? 
-
-
-* Deploy Contract with initial MerkleMap(Merkle Tree) to hold Planet Hashes and World Radius
-* A player is initiated on the client side within a radius, when a user interacts with UI (Join Game Button).
-* A user is asked to give a secret phrase (salt).
-* 
-* 
+* [Simple Game Explanation](https://trapdoortech.medium.com/dark-forest-one-interesting-game-with-zk-snark-technology-47528fa7691e)
+* [ZK Global Game Overview](https://www.youtube.com/watch?v=nwUCccUS75k)
+* [Original DF git repo](https://github.com/darkforest-eth)
    
