@@ -1,11 +1,88 @@
-![alt text](image.png)
+![alt text](images/cover.png)
 
 # Dark Armada: Masters of  the Void
 
-## Introduction 
-Dark Armada is a MMO (massively multiplayer online) game using Zero Knowledge proofs(ZKPs) to simulate verifiable fog of war. 
+## Background
 
-Imagine an expansive galaxy teeming with myriad planets, each fortified and primed for cosmic conflict. As a player, you are thrust into this universe by assuming command of one of these planets, becoming its ruler and guardian. Upon embarking on this interstellar journey, players take control of planets and covertly organize defensive fleets, concealed from adversaries through the use of zero-knowledge proofs (zk-SNARKs). The attacks on these planets are however, public. 
+"Dark Armada: Masters of the Void" is a massively multiplayer online (MMO) game that utilizes Zero Knowledge Proofs (ZKPs) to create a verifiable fog of war. Inspired by the "Dark Forest zkSNARK space warfare" game, which was implemented on EVM with Circom circuits, this version is developed in O1js—a TypeScript embedded DSL for ZK—and the contracts are deployed on Mina. Additionally, the game logic has been significantly revised to enhance strategic depth,a nd provide a completely different experience than that of "dark forest".
+
+## Introduction to the game 
+
+Imagine an expansive galaxy teeming with myriad planets, each fortified and primed for cosmic conflict. As a player, you are thrust into this universe by assuming command of one of these planets, becoming its ruler and guardian. Upon embarking on this interstellar journey, players take control of planets and covertly organize defensive fleets, concealed from adversaries through the use of zero-knowledge proofs (zk-SNARKs). 
+
+Both the planet coordinates and their defensive strategies remain private. Only the hashes of these coordinates and defensive tactics are stored in public off-chain storage. The Mina smart contract on-chain maintains the root of Merkle Maps for planet location and planet defense, verifying the integrity of the off-chain storage.
+
+
+
+## How are Planets initiated and discovered?
+
+Planet coordinates are kept private, with only their Poseidon hash values stored in public off-chain storage. The on-chain Mina smart contract secures the integrity of these locations through the root of Merkle Maps. Players must "mine" to uncover the concealed coordinates of other planets, scanning the vast universe with limited range and employing Poseidon hash collision techniques to discover them.
+
+Picture yourself navigating the immense universe, where you're limited to scanning (enumerating) the nearby space—using hash collision to seek out other planets.
+
+Here is the 2 step process of Initiating a planet, and "mining" for the location of the planet: 
+
+Step 1: Initiating Planets
+
+A player picks a co-ordinate, e.g. (3,1), and generates proof that those co-ordinates are within the game universe. Once the proof is verified on Mina Blockchain, the merkle map root is updated, and the markle map is stored off-chain.
+
+![alt text](images/initiate.png)
+
+Step 2: Mining (Discovering Hidden Planets)
+
+Other players, represented by Player 2 here, "mines" for the location of planets. Player 2 iterates over pairs of co-ordinate values (x, y), applying the Poseidon hash function to each pair, and comparing the resulting hash to the hash of a specific pairs, that has initiated planets. In our example [3,1] is one such pair.
+
+![alt text](images/mine.png)
+
+## How Battles work? 
+
+Once a player discovers another planet, they have the option to "attack" it. However, the defensive measures of the planet remain confidential, while the attacks are conducted openly. The outcome of the defense, whether successful or not, results in the leakage of some information, enabling future attackers to formulate educated guesses about the planet's defenses.
+
+Here's the 4 step process of how battles work: 
+
+Step 1: Initiating Defense Fleet
+
+Player 1 (Planet owner), sets up a hidden defense fleet for a planet. The details of this fleet are kept private and stored off-chain. To validate the existence and the integrity of the fleet without revealing its specifics, a zero-knowledge proof (ZK Proof) is generated and then verified. Once the proof is verified, the merkle map roots to reflect the new state in Mina blockchain.
+
+![alt text](images/step1_battle.png)
+
+ Step 2: Public Attack
+
+Player 2 initiates a public attack on a planet by deploying an attack fleet, the details of which are stored off-chain but visible to all. A zero-knowledge proof for this fleet is generated and verified. Upon successful verification, the Mina smart contract is updated to include the new proof in the verified Merkle Map roots.
+
+![alt text](images/step2_battle.png)
+
+Step 3: Battle Computations
+
+ Since only the defender (Player 1) possesses complete knowledge of their defense fleet, they are responsible for calculating the outcome of the battle, taking into account both their private defense details and the publicly known attacking fleet. They must then submit both the proof and the result of the battle on-chain. This two-step resolution process, although less than ideal, affects the user experience. Unfortunately, it was the only method I could devise to ensure a fair and verifiable battle.
+
+![alt text](images/step3_battle.png)
+
+Step 4(Optional) : Plunder Planet
+
+If the defender (Player 1) anticipates that an incoming attack will likely lead to a defeat, they may opt to "ghost" the attacker by failing to submit the required proof. To address this scenario, we've introduced a "collect forfeit" mechanism. This allows an attacker (Player 2) to essentially loot the planet if the defender does not provide proof of defense within a specified timeframe.
+
+![alt text](images/step4_battle.png)
+
+## Zero-knowledge Proof Application
+
+Dark Armada uses ZKP to prove 3 operations regarding planet location and fleet engagements: 
+
+1. Planet initiation - verify that the location is within the game universe.
+2. Planet defense initialization - verify that the defense fleet follows game rules regarding fleet composition and maximum strtength.
+3. Battle Computation - verify that the battle computation is correct based on the engagement rules.
+
+### Planet Initiation 
+
+### Planet Defense Initialization
+
+### Fleet Movement
+
+### Battle computation 
+
+
+
+
 
 ## Game Objects
 The most important aspect of the dark forest universe is `Planet`
