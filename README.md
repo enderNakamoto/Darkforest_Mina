@@ -17,6 +17,7 @@
       - [Poseidon hashing on M1 Mac](#poseidon-hashing-on-m1-mac)
       - [Keccak256 hashing on M1 Mac](#keccak256-hashing-on-m1-mac)
       - [Chain Poseidon hash on M1 Mac](#chain-poseidon-hash-on-m1-mac)
+  * [Game Progress](#game-progress)    
   * [References](#references)
 
 ## Background
@@ -257,6 +258,25 @@ Therefore, We can arbitrarily increase the time needed to hash every co-ordinate
 e.g. with a N of 100,000 -  hasing 100 co-ordinates will take more than 4 minutes. 
 
 Thus, given a big enough universe, it would be quite hard for anyone to bruteforce all the co-ordinates.
+
+## Game Progress
+
+* :heavy_check_mark: Mining Benchmark
+* :heavy_check_mark: Spawning Benchmark
+* :heavy_check_mark: Fleet ZKP
+* :heavy_check_mark: Init Plamet ZKP
+* :heavy_check_mark: Battle ZKP
+* :wrench: Contract Composition 
+* :wrench: E2E Testing 
+* :x: Game Simulation
+* :x: UI - contract interaction
+* :x: UI - Initiate planet 
+* :x: UI - Mine for planet locations
+
+
+
+
+
 
 ## References 
 
