@@ -247,7 +247,7 @@ Hashing with `Hash.SHA3_256.hash(bytes), Hash.SHA3_512.hash(bytes) and Hash.SHA3
 
 Therefore, it might be better to use the Keccak hash to save planet locations publicly to add extra layer of protection. Ironically, because Keccak is less efficient, it yields better protection.
 
-On [Shigoto-dev19](https://github.com/Shigoto-dev19)'s, recommenation,Chain Poseidon hash, was eexperimented with is to create a final hash, where we hash a Field to itself N number of times to increase the hashing time.
+On [Shigoto-dev19](https://github.com/Shigoto-dev19)'s, recommenation, chain Poseidon hash, was experimented with is to create a final hash, where we hash a Field to itself N number of times to increase the hashing time.
 
 #### Chain Poseidon hash on M1 Mac 
 * time taken to hash 100 coordinates: 25062 ms
@@ -256,7 +256,7 @@ Therefore, We can arbitrarily increase the time needed to hash every co-ordinate
 
 e.g. with a N of 100,000 -  hasing 100 co-ordinates will take more than 4 minutes. 
 
-Given a big enough universe, it would be quite hard for anyone to bruteforce all the co-ordinates.
+Thus, given a big enough universe, it would be quite hard for anyone to bruteforce all the co-ordinates.
 
 ## References 
 
