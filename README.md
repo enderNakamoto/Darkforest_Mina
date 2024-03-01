@@ -259,7 +259,7 @@ e.g. with a N of 100,000 -  hasing 100 co-ordinates will take more than 4 minute
 
 Thus, given a big enough universe, it would be quite hard for anyone to bruteforce all the co-ordinates.
 
-## Game Progress
+## Development Progress
 
 * :white_check_mark: Mining Benchmark
 * :white_check_mark: Spawning Benchmark
