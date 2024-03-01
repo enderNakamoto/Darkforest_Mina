@@ -261,21 +261,17 @@ Thus, given a big enough universe, it would be quite hard for anyone to brutefor
 
 ## Game Progress
 
-* :heavy_check_mark: Mining Benchmark
-* :heavy_check_mark: Spawning Benchmark
-* :heavy_check_mark: Fleet ZKP
-* :heavy_check_mark: Init Plamet ZKP
-* :heavy_check_mark: Battle ZKP
+* :white_check_mark: Mining Benchmark
+* :white_check_mark: Spawning Benchmark
+* :white_check_mark: Fleet ZKP
+* :white_check_mark: Init Plamet ZKP
+* :white_check_mark: Battle ZKP
 * :wrench: Contract Composition 
 * :wrench: E2E Testing 
 * :x: Game Simulation
 * :x: UI - contract interaction
 * :x: UI - Initiate planet 
 * :x: UI - Mine for planet locations
-
-
-
-
 
 
 ## References 
