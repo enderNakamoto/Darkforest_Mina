@@ -2,6 +2,23 @@
 
 # Dark Armada: Masters of  the Void
 
+- [Dark Armada: Masters of  the Void](#dark-armada--masters-of--the-void)
+  * [Background](#background)
+  * [Introduction to the game](#introduction-to-the-game)
+  * [How are Planets initiated and discovered?](#how-are-planets-initiated-and-discovered-)
+  * [How Battles work?](#how-battles-work-)
+  * [ZKPs in the game:](#zkps-in-the-game-)
+    + [Planet Initiation](#planet-initiation)
+    + [Fleet Initialization](#fleet-initialization)
+    + [Battle computation](#battle-computation)
+  * [Spawning Solar systems/Planets](#spawning-solar-systems-planets)
+    + [Numerical Insights on spawning:](#numerical-insights-on-spawning-)
+  * [Mining Planets (Benchmarking)](#mining-planets--benchmarking-)
+      - [Poseidon hashing on M1 Mac](#poseidon-hashing-on-m1-mac)
+      - [Keccak256 hashing on M1 Mac](#keccak256-hashing-on-m1-mac)
+      - [Chain Poseidon hash on M1 Mac](#chain-poseidon-hash-on-m1-mac)
+  * [References](#references)
+
 ## Background
 
 "Dark Armada: Masters of the Void" is a massively multiplayer online (MMO) game that utilizes Zero Knowledge Proofs (ZKPs) to create a verifiable fog of war. Inspired by the "Dark Forest zkSNARK space warfare" game, which was implemented on EVM with Circom circuits, this version is developed in O1js—a TypeScript embedded DSL for ZK—and the contracts are deployed on Mina. Additionally, the game logic has been significantly revised to enhance strategic depth,a nd provide a completely different experience than that of "dark forest".
@@ -190,18 +207,21 @@ function calculateWinner(attackFleet: Fleet, defenseFleet: Fleet): Field{
 
 ## Spawning Solar systems/Planets
 Creating a universe that balances realism with engaging gameplay presents a unique challenge. 
-We use Poseidon hash functions to generate planet coordinates, adjusting their rarity by modifying the number of leading zeros in the hash values. This method creates a randomized yet controlled distribution of planets, essential for gameplay dynamics. The scripts for the numerical tests is in `helpers/birthing.ts` 
+We use Poseidon hash functions to generate planet coordinates, adjusting their rarity by modifying the number of leading zeros in the hash values. This method creates a randomized yet controlled distribution of planets, essential for gameplay dynamics. 
 
-### Numerical Insights
-**Initial Test**: On a 200 x 200 grid, the number of planets varied significantly with the change in leading zeros:
+![alt text](images/spawn.png)
 
-* With no leading zeros, 34,930 planets (87.325% of coordinates)
+
+### Numerical Insights on spawning:
+
+The scripts for the numerical tests is in `helpers/birthing.ts` 
+
+**Initial Test**: On a 200 x 200 grid (40,000 locations), the number of planets varied significantly with the change in leading zeros:
+
 * With one zero, 7,151 planets (17.8775%)
 * With two zeros, 243 planets (0.60825%)
 
-Increasing zeros further drastically reduced the number of planets.
-
-**Realistic Comparison**: In reality, only about 14 known stars exist within a 10 light-year radius of our Sun. This sparsity contrasts with the game's initial setting, where around 190 stars are placed within a 100 light-year radius, with a difficulty of three leading zeros.
+Increasing leading zeros requirement  further drastically reduced the number of planets.
 
 ## Mining Planets (Benchmarking)
 
@@ -209,7 +229,7 @@ The coordinates of planets are stored as private data and are not publicly discl
 
 In a game arena, be it a square grid of dimensions N x N or a circle with radius R, the objective is to discover the private coordinates of all planets. This is achieved through identifying hash collisions - by generating and comparing the Poseidon hashes for every possible coordinate pair within the game's defined space.
 
-Thhe experiment at `helpers/exp/mining.ts` aims to determine the time frame necessary to uncover the coordinates of all planets via hash collisions. The findings from this experiment will be pivotal in defining the size of the search space (game world), ensuring it offers an adequate level of challenge while maintaining cryptographic integrity.
+The experiment at `helpers/exp/mining.ts` aims to determine the time frame necessary to uncover the coordinates of all planets via hash collisions. The findings from this experiment will be pivotal in defining the size of the search space (game world), ensuring it offers an adequate level of challenge while maintaining cryptographic integrity.
 
 We also compare Poseidon with with Keccak 
 
@@ -227,14 +247,14 @@ Hashing with `Hash.SHA3_256.hash(bytes), Hash.SHA3_512.hash(bytes) and Hash.SHA3
 
 Therefore, it might be better to use the Keccak hash to save planet locations publicly to add extra layer of protection. Ironically, because Keccak is less efficient, it yields better protection.
 
-According to [Shigoto-dev19](https://github.com/Shigoto-dev19)'s, recommenation we should probably just use Poseidon chain hash - that is to create a final hash, we can hash the function to itself N number of times to increase the time 
+On [Shigoto-dev19](https://github.com/Shigoto-dev19)'s, recommenation,Chain Poseidon hash, was eexperimented with is to create a final hash, where we hash a Field to itself N number of times to increase the hashing time.
 
-### Chain Poseidon (1000) on M1 Mac 
+#### Chain Poseidon hash on M1 Mac 
 * time taken to hash 100 coordinates: 25062 ms
 
-We can arbitrarily increase the time needed to hash every co-ordinate to make this super hard for anyone to bruteforce all the co-ordinates in the map easily 
+Therefore, We can arbitrarily increase the time needed to hash every co-ordinate to make this super hard for anyone to bruteforce all the co-ordinates in the map easily.
 
-e.g. hashing 100,000 times -  100 co-ordinates mwill take more than 4 minutes. 
+e.g. with a N of 100,000 -  hasing 100 co-ordinates will take more than 4 minutes. 
 
 Given a big enough universe, it would be quite hard for anyone to bruteforce all the co-ordinates.
 
@@ -243,4 +263,3 @@ Given a big enough universe, it would be quite hard for anyone to bruteforce all
 * [Simple Game Explanation](https://trapdoortech.medium.com/dark-forest-one-interesting-game-with-zk-snark-technology-47528fa7691e)
 * [ZK Global Game Overview](https://www.youtube.com/watch?v=nwUCccUS75k)
 * [Original DF git repo](https://github.com/darkforest-eth)
-   
