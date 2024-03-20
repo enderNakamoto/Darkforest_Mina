@@ -19,6 +19,8 @@ export class PlanetCreator extends SmartContract {
     // state of the game   
     @state(Field) numberOfPlanets = State<Field>();
     @state(Field) numberofAttacks = State<Field>();
+    // max side(N) of NxN game map
+    @state(Field) gameMapSize = State<Field>(); 
 
     // Planet Ledger Merkle Map key, value pair is (playerAddress, homePlanetHash)
     @state(Field) planetLedgerRoot = State<Field>(); 
@@ -47,5 +49,3 @@ export class PlanetCreator extends SmartContract {
     // method to collect forfiet on a planet
 
 }
-
-
