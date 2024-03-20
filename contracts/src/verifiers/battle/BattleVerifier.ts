@@ -9,10 +9,10 @@ import {
     MerkleMapWitness
    } from 'o1js';
 
-import { Errors } from '../../utils/errors';
-import { Const } from '../../utils/const';
+import { Errors } from '../../lib/errors';
+import { Const } from '../../lib/const';
 import { Fleet, Planet } from '../../utils/globalTypes';
-import { verifyFleetStrength } from '../../utils/gameLogic';
+import { verifyFleetStrength } from '../../lib/gameLogic';
 
 function calculateWinner(attackFleet: Fleet, defenseFleet: Fleet): Field{
   const attackeBattleships = attackFleet.battleships.mul(Const.BATTLESHIP_COST);

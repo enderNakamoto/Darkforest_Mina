@@ -10,7 +10,7 @@ import {
 
   import { Fleet } from '../../utils/globalTypes';
   import { DefenseVerifier } from './DefenseVerifier';
-  import  { Errors } from '../../utils/errors';
+  import  { Errors } from '../../lib/errors';
 
 
   let proofsEnabled = false;

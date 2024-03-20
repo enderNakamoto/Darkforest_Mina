@@ -8,9 +8,9 @@ import {
     MerkleMapWitness
    } from 'o1js';
 
-import { Errors } from '../../utils/errors';
+import { Errors } from '../../lib/errors';
 import { Fleet } from '../../utils/globalTypes';
-import { verifyFleetStrength } from '../../utils/gameLogic';
+import { verifyFleetStrength } from '../../lib/gameLogic';
 
 
   export class DefenseVerifier extends SmartContract {

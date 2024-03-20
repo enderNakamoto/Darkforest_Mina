@@ -13,11 +13,13 @@ export class Fleet extends Struct({
     };
   };
  
-  export class PlanetDetails extends Struct({
+export class PlanetDetails extends Struct({
      name: CircuitString,
+     coordinateHash: Field,
+     faction: Field,
      status: Field,
      points: Field,
      owner: Field,
      defense: Fleet,
      incomingAttack: Fleet,
-  }){}
+}){}

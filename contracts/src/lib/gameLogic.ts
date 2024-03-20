@@ -1,4 +1,4 @@
-import { Fleet } from "./globalTypes";
+import { Fleet } from "./models";
 import { Const } from "./const";
 import { Errors } from "./errors";
 

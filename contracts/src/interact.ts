@@ -11,7 +11,7 @@ import {
 import {
     getRandomHomePlanetCoordsCircle, 
     getRandomHomePlanetCoordsSquare
-} from "./utils/planetInitiation.js";
+} from "./lib/planetInitiation.js";
 
 import { PlanetCreator } from './verifiers/planet/PlanetCreator.js';
 
