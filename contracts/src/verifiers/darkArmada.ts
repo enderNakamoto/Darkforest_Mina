@@ -3,10 +3,13 @@ import {
     SmartContract, 
     state,
     State, 
-    method, 
+    method,
+    PublicKey,
+    CircuitString, 
 } from 'o1js';
 
-import { Const } from '../lib/const';}
+import { Const } from '../lib/const';
+import { Fleet } from '../lib/models';
 
 export class DarkArmada extends SmartContract {
 
@@ -49,22 +52,86 @@ export class DarkArmada extends SmartContract {
         this.planetDetailsRoot.set(Const.EMPTY_MAP_ROOT);
         this.planetAttacksRoot.set(Const.EMPTY_MAP_ROOT);
         this.planetDefenseRoot.set(Const.EMPTY_MAP_ROOT);
+
       }
 
 
-    // method to create a planet
-    @method createPlanet() {
+    /**
+     * Verify all the requirements to create a planet, and update on-chain states.
+     * 
+     * @param name
+     * @param faction
+     * @param x
+     * @param y
+     * @param ledgerKeyWitness
+     * @param planetDetailsKeyWitness
+     */
+    @method createPlanet(name: CircuitString, faction: Field, x: Field, y: Field, ledgerKeyWitness: Field, planetDetailsKeyWitness: Field) {
+        // verify that the player has not already created a home planet
+        // verify that the planet is within the game map
+        // verify that the planet coordiantes are not taken
+        // x,y coordinate hash must be less than the difficulty cutoff
+        // update merkle maps with the new planet details
+        // increase the number of planets
+        // emit the event
     }
 
 
-    // method to set planetary defense 
-    @method setPlanetaryDefense() {
+    /**
+     * Verify all the requirements to update a planet's defense, and update on-chain states.
+     * 
+     * @param DefenseFleet 
+     * @param defenseKeyWitness
+     */
+    @method setPlanetaryDefense(defenseFleet: Fleet, defenseKeyWitness: Field) {
+        // verify that the defense fleet is valid
+        // update the defense
+        // emit the event
     }
 
-    // method to attack a planet
+    /**
+     * Verify all the requirements to launch an attack, and update on-chain states.
+     * 
+     * @param attackFleet
+     * @param attackKeyWitness
+     */
+    @method attackPlanet(attackFleet: Fleet, attackKeyWitness: Field) {
+        // verify that the attack fleet is valid
+        // verify that the planet has a defense
+        // verify that the planet is not already under attack
+        // update on-chain state with the new attack
+        // emit the event
+       
+    }
 
-    // method to compute the outcome of an attack
+    /**
+     * Verify all the requirements to resolve an attack, and update on-chain states.
+     * 
+     * @param attackFleet 
+     * @param defenseFleet
+     * @param detailKeyWitness
+     */
+    @method computeBattleOutcome(defenseFleet: Fleet, attackFleet: Fleet, detailKeyWitness: Field) {
+        // verify that the attack fleet is valid
+        // verify that the attack fleet is not altered
+        // verify that the defense fleet is not altered
+        // compute the battle outcome
+        // update on-chain state with the battle outcome
+        // emit the event
+    }
 
-    // method to collect forfiet on a planet
+    /**
+     * Verify all the requirements to claim a forfeit, and update on-chain states.
+     * 
+     * @param attackingPlayer 
+     * @param detailKeyWitness - defending player's home planet details
+     */
+    @method claimForfeit(attackingPlayer: PublicKey, detailKeyWitness: Field) {
+        // verify that the player who attacked is the one claiming the forfeit
+        // verify that the battle is not computed in 24 hours 
+        // update on-chain state with the forfeit
+        // emit the event
+    }
+
 
 }
