@@ -1,6 +1,6 @@
 import { Poseidon, Field } from 'o1js';
 
-import { Const } from './const';
+import { Const } from './old_const';
 
 // gameworld is a cirdular world with a radius of worldRadius
 export function getRandomHomePlanetCoordsCircle(worldRadius: number = Const.MAX_RADIUS): [{x: number, y: number}, String, number]  {

@@ -9,8 +9,8 @@ import {
     MerkleMapWitness
    } from 'o1js';
 
-import { Errors } from '../../lib/errors';
-import { Const } from '../../lib/const';
+import { Errors } from '../../lib/old_errors';
+import { Const } from '../../lib/old_const';
 import { Fleet, Planet } from '../../utils/globalTypes';
 import { verifyFleetStrength } from '../../lib/gameLogic';
 

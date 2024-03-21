@@ -8,7 +8,7 @@ import {
     MerkleMapWitness
    } from 'o1js';
 
-import { Errors } from '../../lib/errors';
+import { Errors } from '../../lib/old_errors';
 import { Fleet } from '../../utils/globalTypes';
 import { verifyFleetStrength } from '../../lib/gameLogic';
 

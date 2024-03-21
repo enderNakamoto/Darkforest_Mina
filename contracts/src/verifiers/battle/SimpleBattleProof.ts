@@ -1,6 +1,6 @@
 import { Field, Provable, ZkProgram } from 'o1js';
 import { Fleet } from '../../utils/globalTypes.js';
-import {Const} from '../../lib/const.js';
+import {Const} from '../../lib/old_const.js';
 
 const SimpleBattle= ZkProgram({
   name: "simple-battle-proof",

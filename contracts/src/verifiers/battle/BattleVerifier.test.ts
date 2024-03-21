@@ -9,7 +9,7 @@ import {
 
   import { Fleet } from '../../utils/globalTypes';
   import { BattleVerifier } from './BattleVerifier';
-  import  { Errors } from '../../lib/errors';
+  import  { Errors } from '../../lib/old_errors';
 
 
   let proofsEnabled = false;

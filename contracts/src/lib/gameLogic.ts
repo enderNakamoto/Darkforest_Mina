@@ -1,6 +1,6 @@
 import { Fleet } from "./models";
-import { Const } from "./const";
-import { Errors } from "./errors";
+import { Const } from "./old_const";
+import { Errors } from "./old_errors";
 
 export function verifyFleetStrength(fleet: Fleet){
     const fleetStrength = fleet.strength();

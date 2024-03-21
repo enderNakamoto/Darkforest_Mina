@@ -8,10 +8,10 @@ import {
     Poseidon,
     Bool,
     MerkleMapWitness
-   } from 'o1js';
+} from 'o1js';
 
-import { Const } from '../../lib/const';
-import { Errors } from '../../lib/errors';
+import { Const } from '../../lib/old_const';
+import { Errors } from '../../lib/old_errors';
 
 export class Planet extends Struct({
   id: Field,
