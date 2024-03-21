@@ -18,18 +18,16 @@ export class DarkArmada extends SmartContract {
      * State variables. on-chain game state
      */
     @state(Field) numberOfPlanets = State<Field>();
-    @state(Field) numberofAttacks = State<Field>();
-    // max side(N) of NxN game map
-    @state(Field) gameMapSize = State<Field>(); 
-    // Planet Ledger Merkle Map key, value pair is (playerAddress, homePlanetHash)
-    @state(Field) planetLedgerRoot = State<Field>(); 
-    // Planet Details Merkle Map key, value pair is (homePlanetHash, PlanetDetailsHash)
-    @state(Field) planetDetailsRoot = State<Field>();
-    // Planet Attacks Merkle Map key, value pair is (homePlanetHash, incomingAttachHash)
-    @state(Field) planetAttacksRoot = State<Field>();
-    // Planet Defense Merkle Map key, value pair is (homePlanetHash, planetaryDefenseHash)
-    @state(Field) planetDefenseRoot = State<Field>();
-
+    // Planet Ledger Merkle Map - (key, value) pair is (playerAddress, homePlanetHash)
+    @state(Field) ledgerRoot = State<Field>(); 
+    // Planet Details Merkle Map - (key, value) pair is (homePlanetHash, PlanetDetailsHash)
+    @state(Field) detailsRoot = State<Field>();
+    // Planet Attacks Merkle Map - (key, value) pair is (homePlanetHash, incomingAttachHash)
+    @state(Field) attacksRoot = State<Field>();
+    // Planet Defense Merkle Map - (key, value) pair is (homePlanetHash, planetaryDefenseHash)
+    @state(Field) defensesRoot = State<Field>();
+    // Planet Last attacked Merkle Map - (key, value) pair is (homePlanetHash, lastAttackTime)
+    @state(Field) historyRoot = State<Field>();
 
     /** 
      * Game Events  
@@ -47,12 +45,11 @@ export class DarkArmada extends SmartContract {
     init() {
         super.init();
         this.numberOfPlanets.set(Field(0));
-        this.numberofAttacks.set(Field(0));
-        this.gameMapSize.set(Const.INITIAL_GAME_LENGTH);
-        this.planetLedgerRoot.set(Const.EMPTY_MAP_ROOT);
-        this.planetDetailsRoot.set(Const.EMPTY_MAP_ROOT);
-        this.planetAttacksRoot.set(Const.EMPTY_MAP_ROOT);
-        this.planetDefenseRoot.set(Const.EMPTY_MAP_ROOT);
+        this.ledgerRoot.set(Const.EMPTY_MAP_ROOT);
+        this.detailsRoot.set(Const.EMPTY_MAP_ROOT);
+        this.attacksRoot.set(Const.EMPTY_MAP_ROOT);
+        this.defensesRoot.set(Const.EMPTY_MAP_ROOT);
+        this.historyRoot.set(Const.EMPTY_MAP_ROOT);
       }
 
 
@@ -66,8 +63,23 @@ export class DarkArmada extends SmartContract {
      * @param ledgerKeyWitness
      * @param planetDetailsKeyWitness
      */
-    @method createPlanet(name: CircuitString, faction: Field, x: Field, y: Field, ledgerKeyWitness: Field, planetDetailsKeyWitness: Field) {
+    @method createPlanet(
+        name: CircuitString, 
+        faction: Field, 
+        x: Field, 
+        y: Field, 
+        ledgerKeyWitness: Field, 
+        planetDetailsKeyWitness: Field
+    ) {
+        // verify that the max number of planets has not been reached
+        const numPlanetsState = this.numberOfPlanets.getAndRequireEquals();
+        numPlanetsState.assertLessThan(Const.MAX_NUM_PLANETS, Errors.MAX_NUM_PLANETS_ERROR);
+
         // verify that the player has not already created a home planet
+        const ledgerState = this.ledgerRoot.getAndRequireEquals();
+        
+
+
         // verify that the planet is within the game map
         // verify that the planet coordiantes are not taken
         // x,y coordinate hash must be less than the difficulty cutoff
@@ -112,7 +124,6 @@ export class DarkArmada extends SmartContract {
      * @param detailKeyWitness
      */
     @method computeBattleOutcome(defenseFleet: Fleet, attackFleet: Fleet, detailKeyWitness: Field) {
-        // verify that the attack fleet is valid
         // verify that the attack fleet is not altered
         // verify that the defense fleet is not altered
         // compute the battle outcome

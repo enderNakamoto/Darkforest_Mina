@@ -3,12 +3,13 @@ import {
   } from 'o1js';
 
 
-export namespace ERRORS {
+export namespace Errors {
 
     // create a new planet error messages
     export const COORDINATE_OUT_OF_RANGE_ERROR = 'Coordinate out of range';
     export const PLANET_NOT_FOUND_ERROR = 'Planet not found';
     export const PLANET_ALREADY_EXISTS_ERROR = 'Planet already exists';
+    export const MAX_NUM_PLANETS_ERROR = 'Max number of planets reached';
     
     // set defense error messages
     export const DEFENSE_FLEET_ERROR = 'Planetary defense does not meet requirements';
