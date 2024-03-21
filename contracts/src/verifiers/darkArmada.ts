@@ -52,7 +52,6 @@ export class DarkArmada extends SmartContract {
         this.planetDetailsRoot.set(Const.EMPTY_MAP_ROOT);
         this.planetAttacksRoot.set(Const.EMPTY_MAP_ROOT);
         this.planetDefenseRoot.set(Const.EMPTY_MAP_ROOT);
-
       }
 
 
@@ -132,6 +131,5 @@ export class DarkArmada extends SmartContract {
         // update on-chain state with the forfeit
         // emit the event
     }
-
 
 }
