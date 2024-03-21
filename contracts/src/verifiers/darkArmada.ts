@@ -10,6 +10,7 @@ import {
 
 import { Const } from '../lib/const';
 import { Fleet } from '../lib/models';
+import { Errors } from '../lib/errors';
 
 export class DarkArmada extends SmartContract {
 
