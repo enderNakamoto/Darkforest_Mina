@@ -6,6 +6,8 @@ import {
     method,
     PublicKey,
     CircuitString, 
+    MerkleMapWitness,
+    Poseidon
 } from 'o1js';
 
 import { Const } from '../lib/const';
@@ -68,8 +70,9 @@ export class DarkArmada extends SmartContract {
         faction: Field, 
         x: Field, 
         y: Field, 
-        ledgerKeyWitness: Field, 
-        planetDetailsKeyWitness: Field
+        planetHash: Field,
+        ledgerKeyWitness: MerkleMapWitness, 
+        planetDetailsKeyWitness: MerkleMapWitness
     ) {
         // verify that the max number of planets has not been reached
         const numPlanetsState = this.numberOfPlanets.getAndRequireEquals();
@@ -77,12 +80,25 @@ export class DarkArmada extends SmartContract {
 
         // verify that the player has not already created a home planet
         const ledgerState = this.ledgerRoot.getAndRequireEquals();
-        
+        const [ derivedledgerRoot, derivedledgerKey ] = ledgerKeyWitness.computeRootAndKey(Const.UNINITIALIZED_VALUE);
+        derivedledgerRoot.assertEquals(ledgerState, Errors.PLANET_ALREADY_EXISTS_ERROR);
+        derivedledgerKey.assertEquals(Poseidon.hash(this.sender.toFields()), Errors.PLANET_ALREADY_EXISTS_ERROR);
 
 
         // verify that the planet is within the game map
+        x.assertLessThan(Const.MAX_GAME_MAP_LENGTH, Errors.COORDINATE_OUT_OF_RANGE_ERROR);
+        y.assertLessThan(Const.MAX_GAME_MAP_LENGTH, Errors.COORDINATE_OUT_OF_RANGE_ERROR);
+
         // verify that the planet coordiantes are not taken
+        const detailsState = this.detailsRoot.getAndRequireEquals();
+        const [ derivedDetailsRoot, derivedDetailsKey ] = planetDetailsKeyWitness.computeRootAndKey(Const.UNINITIALIZED_VALUE);
+        derivedDetailsRoot.assertEquals(detailsState, Errors.PLANET_ALREADY_EXISTS_ERROR);
+        derivedDetailsKey.assertEquals(planetHash, Errors.PLANET_ALREADY_EXISTS_ERROR);
+
         // x,y coordinate hash must be less than the difficulty cutoff
+        planetHash.assertLessThan(Const.BIRTHING_DIFFICULTY_CUTOFF, Errors.COORDINATE_NOT_SUITABLE_ERROR);
+
+        
         // update merkle maps with the new planet details
         // increase the number of planets
         // emit the event

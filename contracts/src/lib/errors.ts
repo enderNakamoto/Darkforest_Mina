@@ -10,6 +10,7 @@ export namespace Errors {
     export const PLANET_NOT_FOUND_ERROR = 'Planet not found';
     export const PLANET_ALREADY_EXISTS_ERROR = 'Planet already exists';
     export const MAX_NUM_PLANETS_ERROR = 'Max number of planets reached';
+    export const COORDINATE_NOT_SUITABLE_ERROR = 'Coordinate not suitable for planet creation';
     
     // set defense error messages
     export const DEFENSE_FLEET_ERROR = 'Planetary defense does not meet requirements';
