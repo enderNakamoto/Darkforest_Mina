@@ -18,7 +18,10 @@ export namespace Const {
     // nullifier states
     export const UNINITIALIZED_VALUE = Field(0);
 
-
-
+    // fleet values
+    export const BATTLESHIP_STRENGTH= Field(4);
+    export const DESTROYER_STRENGTH= Field(2);
+    export const CARRIER_STRENGTH= Field(6);
+    export const MAX_FLEET_STRENGTH = Field(1000);
 
 }

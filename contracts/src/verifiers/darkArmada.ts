@@ -11,8 +11,9 @@ import {
 } from 'o1js';
 
 import { Const } from '../lib/const';
-import { Fleet } from '../lib/models';
+import { PlanetDetails, Fleet } from '../lib/models';
 import { Errors } from '../lib/errors';
+import { verifyFleetStrength } from '../lib/gameLogic';
 
 export class DarkArmada extends SmartContract {
 
@@ -35,12 +36,11 @@ export class DarkArmada extends SmartContract {
      * Game Events  
     */
     events = { 
-        "New Homeworld Founded: A New player has joined": Field,
-        "Homeworld Defense Updated: Planetary Defenses updated. Bring it on!": Field,
-        "Attack Launched: Attack Fleet launched": Field,
-        "Attack Vanquished: The Defense fleet successfully repelled the aggresors": Field,
-        "Dfense Breached: The Defense fleet was overpowered": Field,
-        "Forfeit Claimed: The Defense fleet fled like cowards": Field,
+        "Planet Created": Field,
+        "Defense Set": Field,
+        "Attack Launched": Field,
+        "Battle Concluded": Field,
+        "Forfeit Claimed": Field,
     }
 
     // constructor 
@@ -62,6 +62,7 @@ export class DarkArmada extends SmartContract {
      * @param faction
      * @param x
      * @param y
+     * @param planetHash
      * @param ledgerKeyWitness
      * @param planetDetailsKeyWitness
      */
@@ -74,6 +75,8 @@ export class DarkArmada extends SmartContract {
         ledgerKeyWitness: MerkleMapWitness, 
         planetDetailsKeyWitness: MerkleMapWitness
     ) {
+        let ledgerRootAfter, detailsRootAfter, _
+
         // verify that the max number of planets has not been reached
         const numPlanetsState = this.numberOfPlanets.getAndRequireEquals();
         numPlanetsState.assertLessThan(Const.MAX_NUM_PLANETS, Errors.MAX_NUM_PLANETS_ERROR);
@@ -98,22 +101,51 @@ export class DarkArmada extends SmartContract {
         // x,y coordinate hash must be less than the difficulty cutoff
         planetHash.assertLessThan(Const.BIRTHING_DIFFICULTY_CUTOFF, Errors.COORDINATE_NOT_SUITABLE_ERROR);
 
-        
         // update merkle maps with the new planet details
+        const planetDetails = new PlanetDetails({name, faction, points: Field(0)});
+        const planetDetailsHash = Poseidon.hash(PlanetDetails.toFields(planetDetails));
+
+        [ detailsRootAfter, _ ] = planetDetailsKeyWitness.computeRootAndKey(planetDetailsHash);
+        this.detailsRoot.set(detailsRootAfter);
+
+        [ ledgerRootAfter, _ ] = ledgerKeyWitness.computeRootAndKey(planetHash);
+        this.ledgerRoot.set(ledgerRootAfter);
+
         // increase the number of planets
+        this.numberOfPlanets.set(numPlanetsState.add(Field(1)));
+
         // emit the event
+        this.emitEvent("Planet Created", planetHash);
     }
 
 
     /**
      * Verify all the requirements to update a planet's defense, and update on-chain states.
      * 
-     * @param DefenseFleet 
+     * @param defenseFleet 
+     * @param planetHash
      * @param defenseKeyWitness
+     * @param ledgerKeyWitness
      */
-    @method setPlanetaryDefense(defenseFleet: Fleet, defenseKeyWitness: Field) {
+    @method setPlanetaryDefense(
+        defenseFleet: Fleet, 
+        planetHash: Field,
+        defenseKeyWitness: MerkleMapWitness,
+        ledgerKeyWitness: MerkleMapWitness
+        ) {
+
+        // verify that the player is the owner of the planet
+        const ledgerState = this.ledgerRoot.getAndRequireEquals();
+        const [ derivedledgerRoot, derivedledgerKey ] = ledgerKeyWitness.computeRootAndKey(Const.UNINITIALIZED_VALUE);
+        
+
         // verify that the defense fleet is valid
+        verifyFleetStrength(defenseFleet);
+
         // update the defense
+        const defenseHash = Poseidon.hash(Fleet.toFields(defenseFleet));
+        const [ defenseRootAfter, _ ] = defenseKeyWitness.computeRootAndKey(defenseHash);
+
         // emit the event
     }
 

@@ -8,18 +8,13 @@ export class Fleet extends Struct({
     carriers: Field
   }){
     strength(){
-      const fleetSTrength = this.battleships.add(this.destroyers).add(this.carriers);
-      return fleetSTrength;
+      const fleetStrength = this.battleships.add(this.destroyers).add(this.carriers);
+      return fleetStrength;
     };
   };
  
 export class PlanetDetails extends Struct({
      name: CircuitString,
-     coordinateHash: Field,
      faction: Field,
-     status: Field,
      points: Field,
-     owner: Field,
-     defense: Fleet,
-     incomingAttack: Fleet,
 }){}

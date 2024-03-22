@@ -12,13 +12,13 @@ export namespace Errors {
     export const MAX_NUM_PLANETS_ERROR = 'Max number of planets reached';
     export const COORDINATE_NOT_SUITABLE_ERROR = 'Coordinate not suitable for planet creation';
     
-    // set defense error messages
-    export const DEFENSE_FLEET_ERROR = 'Planetary defense does not meet requirements';
+    // fleet error messages
+    export const FLEET_STRENGTH_ERROR = 'Fleet strength too high';
 
     // attack error messages
     export const PLANET_UNDER_ATTACK_ERROR = 'Planet is already under attack';
     export const NO_DEFENSE_ERROR = 'Planet has no defense';
-    export const INVALID_ATTACK_FLEET_ERROR = 'Invalid attack fleet';
+
 
     // resolve attack error messages
     export const ATTACK_DOES_NOT_MATCH_ERROR = 'Attack does not match';
