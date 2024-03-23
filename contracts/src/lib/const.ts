@@ -18,6 +18,12 @@ export namespace Const {
     // nullifier states
     export const UNINITIALIZED_VALUE = Field(0);
 
+    // planet defense states
+    export const PLANETARY_DEFENSE_NOT_SET = Field(0);
+
+    // planet attack states
+    export const NOT_UNDER_ATTACK = Field(0);
+
     // fleet values
     export const BATTLESHIP_STRENGTH= Field(4);
     export const DESTROYER_STRENGTH= Field(2);

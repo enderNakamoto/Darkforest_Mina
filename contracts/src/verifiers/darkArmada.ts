@@ -123,21 +123,13 @@ export class DarkArmada extends SmartContract {
      * Verify all the requirements to update a planet's defense, and update on-chain states.
      * 
      * @param defenseFleet 
-     * @param planetHash
      * @param defenseKeyWitness
-     * @param ledgerKeyWitness
      */
     @method setPlanetaryDefense(
         defenseFleet: Fleet, 
-        planetHash: Field,
         defenseKeyWitness: MerkleMapWitness,
-        ledgerKeyWitness: MerkleMapWitness
         ) {
-
-        // verify that the player is the owner of the planet
-        const ledgerState = this.ledgerRoot.getAndRequireEquals();
-        const [ derivedledgerRoot, derivedledgerKey ] = ledgerKeyWitness.computeRootAndKey(Const.UNINITIALIZED_VALUE);
-        
+        // TO DO - verify that the player is the owner of the planet
 
         // verify that the defense fleet is valid
         verifyFleetStrength(defenseFleet);
@@ -145,8 +137,10 @@ export class DarkArmada extends SmartContract {
         // update the defense
         const defenseHash = Poseidon.hash(Fleet.toFields(defenseFleet));
         const [ defenseRootAfter, _ ] = defenseKeyWitness.computeRootAndKey(defenseHash);
+        this.defensesRoot.set(defenseRootAfter);
 
         // emit the event
+        this.emitEvent("Defense Set", defenseHash);
     }
 
     /**
@@ -154,13 +148,36 @@ export class DarkArmada extends SmartContract {
      * 
      * @param attackFleet
      * @param attackKeyWitness
+     * @param targetKeyWitness
      */
-    @method attackPlanet(attackFleet: Fleet, attackKeyWitness: Field) {
+    @method attackPlanet(
+        attackFleet: Fleet, 
+        attackKeyWitness: MerkleMapWitness, 
+        targetKeyWitness: MerkleMapWitness
+        ) {
+        let derivedDefenseRoot, derivedAttackRoot, attackRootAfter, _
         // verify that the attack fleet is valid
+        verifyFleetStrength(attackFleet);
+
         // verify that the planet has a defense
+        const defenseState = this.defensesRoot.getAndRequireEquals();
+        [ derivedDefenseRoot, _ ] = targetKeyWitness.computeRootAndKey(Const.PLANETARY_DEFENSE_NOT_SET);
+        derivedDefenseRoot.assertNotEquals(defenseState, Errors.NO_DEFENSE_ERROR);
+
+
         // verify that the planet is not already under attack
+        const attackState = this.attacksRoot.getAndRequireEquals();
+        [ derivedAttackRoot, _ ] = attackKeyWitness.computeRootAndKey(Const.NOT_UNDER_ATTACK);
+        derivedAttackRoot.assertEquals(attackState, Errors.PLANET_UNDER_ATTACK_ERROR);
+
+
         // update on-chain state with the new attack
+        const attackHash = Poseidon.hash(Fleet.toFields(attackFleet));
+        [ attackRootAfter, _ ] = attackKeyWitness.computeRootAndKey(attackHash);
+        this.attacksRoot.set(attackRootAfter);
+
         // emit the event
+        this.emitEvent("Attack Launched", attackHash);
        
     }
 
