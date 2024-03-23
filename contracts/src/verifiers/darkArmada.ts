@@ -1,5 +1,6 @@
 import { 
-    Field, 
+    Field,
+    UInt64,
     SmartContract, 
     state,
     State, 
@@ -155,7 +156,7 @@ export class DarkArmada extends SmartContract {
         attackKeyWitness: MerkleMapWitness, 
         targetKeyWitness: MerkleMapWitness
         ) {
-        let derivedDefenseRoot, derivedAttackRoot, attackRootAfter, _
+        let derivedDefenseRoot, derivedAttackRoot, attackRootAfter, historyRootAfter, _
         // verify that the attack fleet is valid
         verifyFleetStrength(attackFleet);
 
@@ -175,6 +176,11 @@ export class DarkArmada extends SmartContract {
         const attackHash = Poseidon.hash(Fleet.toFields(attackFleet));
         [ attackRootAfter, _ ] = attackKeyWitness.computeRootAndKey(attackHash);
         this.attacksRoot.set(attackRootAfter);
+
+        // update the last attacked time
+        const currentTime = this.network.timestamp.get();
+        [ historyRootAfter, _ ] = targetKeyWitness.computeRootAndKey(Poseidon.hash(currentTime.toFields()));
+        this.historyRoot.set(historyRootAfter);
 
         // emit the event
         this.emitEvent("Attack Launched", attackHash);
@@ -222,13 +228,25 @@ export class DarkArmada extends SmartContract {
      * Verify all the requirements to claim a forfeit, and update on-chain states.
      * 
      * @param attackingPlayer 
-     * @param detailKeyWitness - defending player's home planet details
+     * @param targetKeyWitness - the key witness for the attacked planet
+     * @param lastAttackTime - the last time the planet was attacked
      */
-    @method claimForfeit(attackingPlayer: PublicKey, detailKeyWitness: Field) {
+    @method claimForfeit(attackingPlayer: PublicKey, targetKeyWitness: MerkleMapWitness, lastAttackTime: UInt64) {
+
         // verify that the player who attacked is the one claiming the forfeit
+        this.sender.assertEquals(attackingPlayer);
+
         // verify that the battle is not computed in 24 hours 
+        const currentTime = this.network.timestamp.get();
+        const [ derivedHistoryRoot, derivedHistoryKey ] = targetKeyWitness.computeRootAndKey(Poseidon.hash(lastAttackTime.toFields()));
+        const timeDifference = currentTime.sub(lastAttackTime);
+        timeDifference.assertLessThan(Const.FORFEIT_CLAIM_DURATION, Errors.FORFEIT_CLAIM_ERROR);
+
         // update on-chain state with the forfeit
+
+
         // emit the event
+        this.emitEvent("Forfeit Claimed", Field(0));
     }
 
 }

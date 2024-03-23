@@ -19,6 +19,8 @@ export namespace Errors {
     export const PLANET_UNDER_ATTACK_ERROR = 'Planet is already under attack';
     export const NO_DEFENSE_ERROR = 'Planet has no defense';
 
+    // invalid player error messages
+    export const INVALID_PLAYER_ERROR = 'Invalid player';
 
     // resolve attack error messages
     export const ATTACK_DOES_NOT_MATCH_ERROR = 'Attack does not match';

@@ -1,5 +1,6 @@
 import {
     Field,
+    UInt64,
     MerkleMap
   } from 'o1js';
 
@@ -29,5 +30,8 @@ export namespace Const {
     export const DESTROYER_STRENGTH= Field(2);
     export const CARRIER_STRENGTH= Field(6);
     export const MAX_FLEET_STRENGTH = Field(1000);
+
+    // forfeit const 
+    export const FORFEIT_CLAIM_DURATION = UInt64.from(86400000); // 24 hours in milliseconds
 
 }
