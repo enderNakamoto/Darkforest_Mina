@@ -13,7 +13,7 @@ import {
 import { Const } from '../lib/const';
 import { PlanetDetails, Fleet } from '../lib/models';
 import { Errors } from '../lib/errors';
-import { verifyFleetStrength } from '../lib/gameLogic';
+import { verifyFleetStrength, calculateWinner } from '../lib/gameLogic';
 
 export class DarkArmada extends SmartContract {
 
@@ -184,16 +184,38 @@ export class DarkArmada extends SmartContract {
     /**
      * Verify all the requirements to resolve an attack, and update on-chain states.
      * 
-     * @param attackFleet 
      * @param defenseFleet
+     * @param defenseFleetHash
+     * @param attackFleet
+     * @param attackFleetHash
      * @param detailKeyWitness
+     * @param attackKeyWitness
+     * @param defenseKeyWitness
      */
-    @method computeBattleOutcome(defenseFleet: Fleet, attackFleet: Fleet, detailKeyWitness: Field) {
+    @method computeBattleOutcome(
+        defenseFleet: Fleet,
+        defenseFleetHash: Field,
+        attackFleet: Fleet, 
+        attackFleetHash: Field,
+        detailKeyWitness: Field
+        )
+         {
         // verify that the attack fleet is not altered
+        const computedAttackFleetHash = Poseidon.hash(Fleet.toFields(attackFleet));
+        computedAttackFleetHash.assertEquals(attackFleetHash, Errors.ATTACK_DOES_NOT_MATCH_ERROR);
+
         // verify that the defense fleet is not altered
+        const computedDefenseFleetHash = Poseidon.hash(Fleet.toFields(defenseFleet));
+        computedDefenseFleetHash.assertEquals(defenseFleetHash, Errors.DEFENSE_DOES_NOT_MATCH_ERROR);
+
         // compute the battle outcome
+        const winner = calculateWinner(attackFleet, defenseFleet);
+
         // update on-chain state with the battle outcome
+        
+
         // emit the event
+        this.emitEvent("Battle Concluded", Field(0));
     }
 
     /**
