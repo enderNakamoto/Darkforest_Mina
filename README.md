@@ -1,6 +1,6 @@
 ![alt text](images/cover.png)
 
-## This Repo serves as the testing/experimentation platform - The Repo has been migrated to [Dark Armada]https://github.com/Cloakworks-collective/dark_armada
+## This Repo serves as the testing/experimentation platform - The Repo has been migrated to [Dark Armada](https://github.com/Cloakworks-collective/dark_armada)
 
 # Dark Armada: Masters of  the Void
 
