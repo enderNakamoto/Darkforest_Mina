@@ -1,5 +1,7 @@
 ![alt text](images/cover.png)
 
+## This Repo serves as the testing/experimentation platform - The Repo has been migrated to [Dark Armada]https://github.com/Cloakworks-collective/dark_armada
+
 # Dark Armada: Masters of  the Void
 
 - [Dark Armada: Masters of  the Void](#dark-armada--masters-of--the-void)
@@ -260,33 +262,6 @@ e.g. with a N of 100,000 -  hasing 100 co-ordinates will take more than 4 minute
 Thus, given a big enough universe, it would be quite hard for anyone to bruteforce all the co-ordinates.
 
 
-## Data Models
-
-### On-chain Data 
-
-* PlanetMapRoot <Field>
-* DetailsRoot <Field>
-* AttacksRoot <Field>
-* numOfAttacks <Field>
-* numOfPlanets <Field>
-
-
-### Off-chain Data 
-
-* PlanetMap <MerkleMap> (PlayerAddress => PlanetLocationHash) 
-* DetailsMap <MerkleMap> (PlanetLocationHash => PlanetDetailsHash)
-* AttacksMap <MerkleMap>
-
-PlanetDetails {
-
-}
-
-DefenseFleet {
-
-}
-
-
-
 ## Development Progress
 
 * :white_check_mark: Mining Benchmark
@@ -294,7 +269,7 @@ DefenseFleet {
 * :white_check_mark: Fleet ZKP
 * :white_check_mark: Init Plamet ZKP
 * :white_check_mark: Battle ZKP
-* :wrench: Contract Composition 
+* :white_check_mark: Contract Composition 
 * :wrench: E2E Testing 
 * :x: Game Simulation
 * :x: UI - contract interaction
